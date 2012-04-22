@@ -1,0 +1,90 @@
+.treewrapper {
+  padding:3px;
+  margin-top: 2px;
+  border: 1px solid #999;
+  background-color: #fff;
+}
+
+.treeselect {
+  margin:0;
+  padding:0;
+  font:90% Arial, Helvetica, sans-serif;
+  color:#555;
+  line-height:150%;
+  text-align:left;
+}
+
+.treeselect a {
+  text-decoration:none;
+  color:#057fac;
+}
+
+.treeselect a:hover{
+  text-decoration:none;
+  color:#999;
+}
+
+.treeselect, .treeselect ul, .treeselect li {
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+
+.treeselect ul {
+  display:none;
+}
+
+.treeselect li {
+  line-height:200%;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #fff;
+  position:relative;
+  width:100%;
+}
+
+.treeselect li ul {
+  margin: 0 15px 0 15px;
+}
+
+.treeselect li.even {
+  background:#f3f3f3;
+}
+.treeselect li.odd {
+  background:#f3f3f3;
+}
+
+.treeselect li input {
+  float:left;
+  position:absolute;
+  top:3px;width:13px;
+  height:13px;
+  cursor:auto;
+  font-size:0;
+}
+
+.treeselect li span {
+  float:left;
+  position:absolute;
+  top:6px;
+  width:13px;
+  height:13px;
+  cursor:auto;
+  font-size:0;
+}
+
+.treeselect li span, .treeselect li span.collapsed {
+  background:url(images/collapsed.gif) no-repeat 0 0;
+}
+
+.treeselect li span.expanded {
+  background:url(images/expanded.gif) no-repeat 0 0;
+}
+
+.treeselect div.treebusy {
+  background:url(images/throbber.gif) no-repeat 0 5px !important;
+  width:50px;
+  height:20px;
+  margin-left:5px;
+  padding-left:18px;
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TreeSelect Control</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel='stylesheet' type='text/css' href='lib/jquery.moreorless.js/moreorless.css' />
+    <link rel='stylesheet' type='text/css' href='css/treeselect.css' />
+    <link rel='stylesheet' type='text/css' href='css/chosen.css' />
+    <script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"></script>
+    <script type='text/javascript' src='lib/jquery.moreorless.js/jquery.moreorless.js'></script>
+    <script type='text/javascript' src='js/jquery.treeselect.js'></script>
+    <script type='text/javascript' src='js/jquery.chosentree.js'></script>
+    <script type='text/javascript'>
+      jQuery(function() {
+
+        var baseLevel = 0;
+        var maxLevel = 0;
+        function loadChildren(node, level) {
+          baseLevel = level = level || baseLevel;
+          for (var i=0; i<5; i++) {
+            var id = node.id + (i+1).toString();
+            node.children.push({
+              id:id,
+              title:'Node ' + id,
+              has_children:(baseLevel < 4),
+              children:[]
+            });
+            if (level < maxLevel) {
+              loadChildren(node.children[i], (level + 1));
+            }
+          }
+          return node;
+        };
+
+        $('div.chosentree').chosentree({
+          width: 500,
+          deepLoad: true,
+          load: function(node, callback) {
+            /**
+             * This would typically be replaced with an jQuery.ajax where
+             * you would return the tree structure for the provided node.
+             */
+            setTimeout(function() {
+              maxLevel = baseLevel + 2;
+              callback(loadChildren(node));
+            }, 1000);
+          }
+        });
+      });
+
+
+    </script>
+  </head>
+  <body>
+    <div class="chosentree"></div>
+  </body>
+</html>
