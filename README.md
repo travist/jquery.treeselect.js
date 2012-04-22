@@ -6,7 +6,8 @@ input's into a hierarchial tree select tool.  You can also call this widget
 with a structured JSON list and it will convert it to an HTML hierarchy select
 tool of those items.
 
-Example
+Live Example
 ----------------------------------
 
-Please take a look at index.html for an example on how to use this library.
+Go to http://travist.github.com/jquery.treeselect.js to see a live demo of this
+widget!
