@@ -230,9 +230,7 @@
             var checked = $(event.target).is(':checked');
 
             // Expand if checked.
-            if (checked) {
-              node.expand(true);
-            }
+            node.expand(checked);
 
             // If they wish to deep load then do that here.
             if (checked && params.deepLoad) {
