@@ -20,7 +20,7 @@
         var maxLevel = 0;
         function loadChildren(node, level) {
           baseLevel = level = level || baseLevel;
-          for (var i=0; i<5; i++) {
+          for (var i=0; i<2; i++) {
             var id = node.id + (i+1).toString();
             node.children.push({
               id:id,
@@ -44,7 +44,7 @@
              * you would return the tree structure for the provided node.
              */
             setTimeout(function() {
-              maxLevel = baseLevel + 2;
+              maxLevel = baseLevel+1;
               callback(loadChildren(node));
             }, 1000);
           }

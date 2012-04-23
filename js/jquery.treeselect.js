@@ -38,27 +38,71 @@
      * Set the busy cursor for this node.
      */
     TreeNode.prototype.setBusy = function(state) {
-      this.busy = state;
-      if (state) {
+      if (state != this.busy) {
+        this.busy = state;
+        if (state) {
 
-        // Create the busy cursor.
-        var busy = $(document.createElement('div')).addClass('treebusy');
-        busy.text('loading...');
+          // Create the busy cursor.
+          var busy = $(document.createElement('div')).addClass('treebusy');
+          busy.text('loading...');
 
-        // If the list exists, then add it before that, otherwise append it
-        // to the display.
-        var list = $('ul', this.display);
-        if (list.length == 0) {
-          this.display.append(busy);
+          // If the list exists, then add it before that, otherwise append it
+          // to the display.
+          var list = $('ul', this.display);
+          if (list.length == 0) {
+            this.display.append(busy);
+          }
+          else {
+            list.prepend(busy);
+          }
         }
         else {
-          list.prepend(busy);
+
+          // Remove the busy cursor.
+          $('div.treebusy', this.display).remove();
         }
       }
-      else {
+    };
 
-        // Remove the busy cursor.
-        $('div.treebusy', this.display).remove();
+    /**
+     * Determines if this node is already loaded.
+     */
+    TreeNode.prototype.isLoaded = function() {
+      return !(this.has_children && this.children.length === 0);
+    };
+
+    /**
+     * Loads the current node.
+     *
+     * @param {function} callback - The callback when the node is loaded.
+     */
+    TreeNode.prototype.loadNode = function(callback) {
+
+      // Only load if we have not loaded yet.
+      if (params.load && (!this.id || !this.isLoaded())) {
+
+        // Make this node busy.
+        this.setBusy(true);
+
+        // Call the load function.
+        params.load(this, function(node) {
+
+          // Build the node.
+          node.build();
+
+          // Say we are not busy.
+          node.setBusy(false);
+
+          // Callback that we are loaded.
+          if (callback) {
+            callback(node);
+          }
+        });
+      }
+      else if (callback) {
+
+        // Just callback since we are already loaded.
+        callback(this);
       }
     };
 
@@ -67,74 +111,42 @@
      */
     TreeNode.prototype.loadAll = function(callback) {
 
-      // If there is a load function.
-      if (params.load) {
+      // Make sure we are loaded first.
+      this.loadNode(function(node) {
 
-        // Get how many children we have.
-        var i = this.children.length, count = i;
+        // Get our children count.
+        var i = node.children.length, count = i;
 
-        // If there are not any loaded children for this node.
-        if (i === 0) {
-
-          // If this node has children, but they are just not loaded...
-          if (this.has_children) {
-
-            // Load the children.
-            params.load(this, function(node) {
-
-              // Build this node then loadAll.
-              node.build();
-              node.loadAll(callback);
-            });
-          }
-
-          // Otherwise, then just callback that we are loaded.
-          else if (callback) {
-            callback(this);
-          }
+        // If no children, then just call the callback immediately.
+        if (!i) {
+          callback(node);
+          return;
         }
-        else {
-
-          // Iterate through each child.
-          while (i--) {
-
-            // Load this childs children...
-            this.children[i].loadAll((function(node) {
-
-              // Called when this child has finished loading.
-              return function(child) {
-
-                // Decrement the child count.
-                count--;
-
-                // If all children are done loading, call the callback.
-                if (!count && callback) {
-                  callback(node);
-                }
-              };
-            })(this));
-          }
-        }
-      }
-    };
-
-    /**
-     * Loads a new tree node.
-     */
-    TreeNode.prototype.loadChildren = function() {
-
-      // Only do this if the load has been defined.
-      if (params.load) {
 
         // Make this node busy.
-        this.setBusy(true);
+        node.setBusy(true);
 
-        // Call the load function.
-        params.load(this, function(node) {
-          node.build();
-          node.expand(true);
-        });
-      }
+        // Iterate through each child.
+        while (i--) {
+
+          // Load this childs children...
+          node.children[i].loadAll(function() {
+
+            // Decrement the child count.
+            count--;
+
+            // If all children are done loading, call the callback.
+            if (callback && !count) {
+
+              // Make this node busy.
+              node.setBusy(false);
+
+              // Callback that we are done loading this tree.
+              callback(node);
+            }
+          });
+        }
+      });
     };
 
     /**
@@ -157,7 +169,9 @@
       if (state && this.children.length == 0 && this.has_children) {
 
         // If there are no children, then we need to load them.
-        this.loadChildren();
+        this.loadNode(function(node) {
+          node.expand(true);
+        });
       }
     };
 
@@ -223,14 +237,8 @@
             // If they wish to deep load then do that here.
             if (checked && params.deepLoad) {
 
-              // Say we are busy.
-              node.setBusy(true);
-
               // Load all nodes underneath this node.
               node.loadAll(function() {
-
-                // Say we are not busy.
-                node.setBusy(false);
 
                 // Select this node when it is done loading.
                 node.select(checked);
@@ -330,12 +338,15 @@
     TreeNode.prototype.build = function() {
 
       // If this is the root node, then load the children.
-      if (!this.id && this.children.length == 0) {
+      if (!this.id && this.children.length === 0) {
 
-        // Load the children.
-        this.loadChildren();
+        // Load this node.
+        this.loadNode(function(node) {
+          node.expand(true);
+        });
       }
       else {
+
         // Keep track of the left margin for each element.
         var left = 0;
 
@@ -369,11 +380,6 @@
         // Check if selected.
         if (this.checked) {
           this.select(this.checked);
-        }
-
-        // If this node is busy, make it not busy.
-        if (this.busy) {
-          this.setBusy(false);
         }
       }
 
