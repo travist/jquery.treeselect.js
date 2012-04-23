@@ -90,13 +90,13 @@
           // Build the node.
           node.build();
 
-          // Say we are not busy.
-          node.setBusy(false);
-
           // Callback that we are loaded.
           if (callback) {
             callback(node);
           }
+
+          // Say we are not busy.
+          node.setBusy(false);
         });
       }
       else if (callback) {
@@ -138,11 +138,11 @@
             // If all children are done loading, call the callback.
             if (callback && !count) {
 
-              // Make this node busy.
-              node.setBusy(false);
-
               // Callback that we are done loading this tree.
               callback(node);
+
+              // Make this node busy.
+              node.setBusy(false);
             }
           });
         }
