@@ -115,43 +115,52 @@
       // Reset the selected callback.
       treeparams.selected = (function(chosentree) {
         return function(node, root) {
-          if (node.checked) {
 
-            // Get and add a new choice.
-            var choice = $(document.createElement('li'));
-            choice.addClass('search-choice');
-            choice.attr('id', 'choice_' + node.id);
+          // Get the existing choices.
+          var selected_choice = $('li#choice_' + node.id, choices);
 
-            // Add the node data to this choice.
-            choice.eq(0)[0].nodeData = node;
+          // Only add if this node is valid.
+          if (node.id) {
 
-            var span = $(document.createElement('span'));
-            span.text(node.title);
+            // Add the choice if not already added.
+            if (node.checked && (selected_choice.length == 0)) {
 
-            var close = $(document.createElement('a'));
-            close.addClass('search-choice-close');
-            close.attr('href', 'javascript:void(0)');
+              // Get and add a new choice.
+              var choice = $(document.createElement('li'));
+              choice.addClass('search-choice');
+              choice.attr('id', 'choice_' + node.id);
 
-            // Bind when someone clicks on the close button.
-            close.bind('click', function(event) {
+              // Add the node data to this choice.
+              choice.eq(0)[0].nodeData = node;
 
-              // Prevent the default.
-              event.preventDefault();
+              var span = $(document.createElement('span'));
+              span.text(node.title);
 
-              // Remove the choice.
-              $('li#choice_' + node.id, choices).remove();
+              var close = $(document.createElement('a'));
+              close.addClass('search-choice-close');
+              close.attr('href', 'javascript:void(0)');
 
-              // Deselect this node.
-              node.select(false);
-            });
+              // Bind when someone clicks on the close button.
+              close.bind('click', function(event) {
 
-            // Add this to the choices.
-            search.before(choice.append(span).append(close));
-          }
-          else {
+                // Prevent the default.
+                event.preventDefault();
 
-            // If not selected, then remove the choice.
-            $('li#choice_' + node.id, choices).remove();
+                // Remove the choice.
+                $('li#choice_' + node.id, choices).remove();
+
+                // Deselect this node.
+                node.select(false);
+              });
+
+              // Add this to the choices.
+              search.before(choice.append(span).append(close));
+            }
+            else if (!node.checked) {
+
+              // If not selected, then remove the choice.
+              selected_choice.remove();
+            }
           }
 
           // Make sure we don't do this often for performance.

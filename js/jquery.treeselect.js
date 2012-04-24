@@ -8,7 +8,8 @@
       colwidth: 18,           /** The width of the columns. */
       selected: null,         /** Callback when an item is selected. */
       load: null,             /** Callback to load new tree's */
-      deepLoad: false         /** Performs a deep load */
+      deepLoad: false,        /** Performs a deep load */
+      selectAll: false
     }, params);
 
     /**
@@ -20,7 +21,7 @@
         id: 0,                /** The ID of this node. */
         value: 0,             /** The input value for this node. */
         title: '',            /** The title of this node. */
-        has_children: false,  /** Boolean if this node has children. */
+        has_children: true,   /** Boolean if this node has children. */
         children: [],         /** Array of children. */
         level: 0,             /** The level of this node. */
         odd: false,           /** The odd/even state of this row. */
@@ -32,6 +33,9 @@
         span: $(),            /** The span display. */
         childlist: $()        /** The childlist display. */
       }, nodeparams);
+
+      // Say that we are a TreeNode.
+      this.isTreeNode = true;
     };
 
     /**
@@ -68,7 +72,9 @@
      * Determines if this node is already loaded.
      */
     TreeNode.prototype.isLoaded = function() {
-      return !(this.has_children && this.children.length === 0);
+      var loaded = !this.has_children;
+      loaded |= (this.has_children && this.children.length > 0);
+      return loaded;
     };
 
     /**
@@ -79,7 +85,7 @@
     TreeNode.prototype.loadNode = function(callback) {
 
       // Only load if we have not loaded yet.
-      if (params.load && (!this.id || !this.isLoaded())) {
+      if (params.load && !this.isLoaded()) {
 
         // Make this node busy.
         this.setBusy(true);
@@ -159,19 +165,33 @@
         this.span.removeClass('collapsed').addClass('expanded');
         this.childlist.show('fast');
       }
-      else {
+      // We don't wan't to collapse if they can't open it back up.
+      else if (this.span.length > 0) {
         this.link.removeClass('expanded').addClass('collapsed');
         this.span.removeClass('expanded').addClass('collapsed');
         this.childlist.hide('fast');
       }
 
       // If the state is expand, but the children have not been loaded.
-      if (state && this.children.length == 0 && this.has_children) {
+      if (state && !this.isLoaded()) {
 
         // If there are no children, then we need to load them.
         this.loadNode(function(node) {
+          if (node.checked) {
+            node.select(node.checked);
+          }
           node.expand(true);
         });
+      }
+    };
+
+    /**
+     * Selects all children of this node.
+     */
+    TreeNode.prototype.selectChildren = function(state) {
+      var i = this.children.length;
+      while (i--) {
+        this.children[i].select(state, true);
       }
     };
 
@@ -186,15 +206,26 @@
       // Make sure the input is checked accordingly.
       this.input.attr('checked', state);
 
-      // Now recursively select the children.
-      var i = this.children.length;
-      while (i--) {
-        this.children[i].select(state, true);
-      }
+      // If they wish to deep load then do that here.
+      if (this.checked && params.deepLoad) {
 
-      // Trigger an event that this node was selected.
-      if (params.selected) {
-        params.selected(this, !child);
+        // Load all nodes underneath this node.
+        this.loadAll(function(node) {
+
+          // Now select the children.
+          node.selectChildren(state);
+          if (params.selected) {
+            params.selected(node, !child);
+          }
+        });
+      }
+      else {
+
+        // Now select the children.
+        this.selectChildren(state);
+        if (params.selected) {
+          params.selected(this, !child);
+        }
       }
     }
 
@@ -214,7 +245,7 @@
      * Build the input and return.
      */
     TreeNode.prototype.build_input = function(left) {
-      if (this.id) {
+      if (this.id || params.selectAll) {
         this.input = $(document.createElement('input'));
         this.input.attr({
           'type': 'checkbox',
@@ -232,21 +263,8 @@
             // Expand if checked.
             node.expand(checked);
 
-            // If they wish to deep load then do that here.
-            if (checked && params.deepLoad) {
-
-              // Load all nodes underneath this node.
-              node.loadAll(function() {
-
-                // Select this node when it is done loading.
-                node.select(checked);
-              });
-            }
-            else {
-
-              // Call the select method.
-              node.select(checked);
-            }
+            // Call the select method.
+            node.select(checked);
           };
         })(this));
       }
@@ -269,7 +287,7 @@
      * Build the span +/- symbol.
      */
     TreeNode.prototype.build_span = function(left) {
-      if (this.id && ((this.children.length > 0) || this.has_children)) {
+      if (this.id && this.has_children) {
         this.span = this.build_link($(document.createElement('span')));
         this.span.css('left', left + 'px');
       }
@@ -335,50 +353,34 @@
      */
     TreeNode.prototype.build = function() {
 
-      // If this is the root node, then load the children.
-      if (!this.id && this.children.length === 0) {
+      // Keep track of the left margin for each element.
+      var left = 0;
 
-        // Load this node.
-        this.loadNode(function(node) {
-          node.expand(true);
-        });
+      // Create the list display.
+      if (this.display.length == 0) {
+        this.display = this.build_list();
       }
-      else {
 
-        // Keep track of the left margin for each element.
-        var left = 0;
+      // Now append the input.
+      if (this.input.length == 0) {
+        this.display.append(this.build_input(left));
+      }
 
-        // Create the list display.
-        if (this.display.length == 0) {
-          this.display = this.build_list();
-        }
+      // Now create the +/- sign if needed.
+      if (this.span.length == 0) {
+        left += params.colwidth;
+        this.display.append(this.build_span(left));
+      }
 
-        // Now append the input.
-        if (this.input.length == 0) {
-          this.display.append(this.build_input(left));
-        }
+      // Now append the node title.
+      if (this.link.length == 0) {
+        left += params.colwidth;
+        this.display.append(this.build_title(left));
+      }
 
-        // Now create the +/- sign if needed.
-        if (this.span.length == 0) {
-          left += params.colwidth;
-          this.display.append(this.build_span(left));
-        }
-
-        // Now append the node title.
-        if (this.link.length == 0) {
-          left += params.colwidth;
-          this.display.append(this.build_title(left));
-        }
-
-        // Append the children.
-        if (this.childlist.length == 0) {
-          this.display.append(this.build_children());
-        }
-
-        // Check if selected.
-        if (this.checked) {
-          this.select(this.checked);
-        }
+      // Append the children.
+      if (this.childlist.length == 0) {
+        this.display.append(this.build_children());
       }
 
       // Return the display.
@@ -388,9 +390,14 @@
     // Iterate through each instance.
     return $(this).each(function() {
 
-      // Create a new tree node.
-      new TreeNode($.extend(params, {display: $(this)})).build();
-
+      // Create a new tree node and load it.
+      var treeParams = $.extend(params, {display: $(this)});
+      new TreeNode(treeParams).loadNode(function(node) {
+        if (node.checked) {
+          node.select(node.checked);
+        }
+        node.expand(true);
+      });
     });
   };
 })(jQuery);
