@@ -19,6 +19,7 @@
       nodeparams.title = nodeparams.title || 'anonymous';
       $.extend(this, {
         id: 0,                /** The ID of this node. */
+        loaded: false,        /** Flag to see if this is loaded. */
         value: 0,             /** The input value for this node. */
         title: '',            /** The title of this node. */
         has_children: true,   /** Boolean if this node has children. */
@@ -72,7 +73,8 @@
      * Determines if this node is already loaded.
      */
     TreeNode.prototype.isLoaded = function() {
-      var loaded = !this.has_children;
+      var loaded = this.loaded;
+      loaded |= !this.has_children;
       loaded |= (this.has_children && this.children.length > 0);
       return loaded;
     };
@@ -92,6 +94,9 @@
 
         // Call the load function.
         params.load(this, function(node) {
+
+          // Say this node is loaded.
+          node.loaded = true;
 
           // Build the node.
           node.build();

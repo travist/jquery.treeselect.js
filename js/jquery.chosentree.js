@@ -14,6 +14,8 @@
       title: '',                     /** The title to add to the input. */
       description: '',               /** The description to add to the input. */
       default_text: 'Select Item',   /** The default text within the input. */
+      min_height: 100,               /** The miniumum height for the chosen. */
+      more_text: '+%num% more',      /** The text to show in the more. */
       loaded: null,                  /** Called when all items are loaded. */
       collapsed: true                /** If the tree should be collapsed. */
     }, params);
@@ -183,7 +185,8 @@
             if (jQuery.fn.moreorless) {
 
               // Add this to the choices.
-              choices.moreorless(100, '+' + nodes.length + ' more');
+              var more_text = params.more_text.replace('%num%', nodes.length);
+              choices.moreorless(params.min_height, more_text);
             }
 
             // If they wish to know when it is loaded.

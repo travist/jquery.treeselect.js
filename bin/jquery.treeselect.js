@@ -19,6 +19,7 @@
       nodeparams.title = nodeparams.title || 'anonymous';
       $.extend(this, {
         id: 0,                /** The ID of this node. */
+        loaded: false,        /** Flag to see if this is loaded. */
         value: 0,             /** The input value for this node. */
         title: '',            /** The title of this node. */
         has_children: true,   /** Boolean if this node has children. */
@@ -72,7 +73,8 @@
      * Determines if this node is already loaded.
      */
     TreeNode.prototype.isLoaded = function() {
-      var loaded = !this.has_children;
+      var loaded = this.loaded;
+      loaded |= !this.has_children;
       loaded |= (this.has_children && this.children.length > 0);
       return loaded;
     };
@@ -92,6 +94,9 @@
 
         // Call the load function.
         params.load(this, function(node) {
+
+          // Say this node is loaded.
+          node.loaded = true;
 
           // Build the node.
           node.build();
@@ -417,6 +422,8 @@
       title: '',                     /** The title to add to the input. */
       description: '',               /** The description to add to the input. */
       default_text: 'Select Item',   /** The default text within the input. */
+      min_height: 100,               /** The miniumum height for the chosen. */
+      more_text: '+%num% more',      /** The text to show in the more. */
       loaded: null,                  /** Called when all items are loaded. */
       collapsed: true                /** If the tree should be collapsed. */
     }, params);
@@ -586,7 +593,8 @@
             if (jQuery.fn.moreorless) {
 
               // Add this to the choices.
-              choices.moreorless(100, '+' + nodes.length + ' more');
+              var more_text = params.more_text.replace('%num%', nodes.length);
+              choices.moreorless(params.min_height, more_text);
             }
 
             // If they wish to know when it is loaded.
