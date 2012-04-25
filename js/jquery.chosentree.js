@@ -72,22 +72,25 @@
       description.text(params.description);
 
       // Create the input element.
-      input = $(document.createElement('input'));
-      input.attr({
-        'type': 'text',
-        'name': params.inputId,
-        'id': params.inputId,
-        'value': params.default_text,
-        'class': 'default',
-        'autocomplete': 'off'
-      });
-      input.css('width', '100%');
-      input.focus(function(event) {
-        showTree(true);
-      });
+      if (params.default_text) {
+        input = $(document.createElement('input'));
+        input.attr({
+          'type': 'text',
+          'name': params.inputId,
+          'id': params.inputId,
+          'value': params.default_text,
+          'class': 'default',
+          'autocomplete': 'off'
+        });
+        input.css('width', '100%');
+        input.focus(function(event) {
+          showTree(true);
+        });
+        search.append(input);
+      }
 
       // Creat the chosen selector.
-      selector.append(title).append(choices.append(search.append(input)));
+      selector.append(title).append(choices.append(search));
 
       treewrapper = $(document.createElement('div'));
       treewrapper.addClass('treewrapper');
