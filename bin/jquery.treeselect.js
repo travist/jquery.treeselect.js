@@ -5,11 +5,12 @@
 
     // Setup the default parameters for the tree select control.
     params = $.extend({
-      colwidth: 18,           /** The width of the columns. */
-      selected: null,         /** Callback when an item is selected. */
-      load: null,             /** Callback to load new tree's */
-      deepLoad: false,        /** Performs a deep load */
-      selectAll: false
+      colwidth: 18,               /** The width of the columns. */
+      selected: null,             /** Callback when an item is selected. */
+      load: null,                 /** Callback to load new tree's */
+      deepLoad: false,            /** Performs a deep load */
+      selectAll: false,           /** If we wish to see a select all. */
+      selectAllText: 'Select All' /** The select all text. */
     }, params);
 
     /**
@@ -369,6 +370,10 @@
       // Now append the input.
       if (this.input.length == 0) {
         this.display.append(this.build_input(left));
+      }
+
+      if (!this.id && params.selectAll && params.selectAllText) {
+        this.display.append('&nbsp;' + params.selectAllText);
       }
 
       // Now create the +/- sign if needed.

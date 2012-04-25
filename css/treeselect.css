@@ -73,6 +73,11 @@
   font-size:0;
 }
 
+.treeselect .treeselect-select-all {
+  float: left;
+  margin-left: 18px;
+}
+
 .treeselect li span, .treeselect li span.collapsed {
   background:url(images/collapsed.gif) no-repeat 0 0;
 }
