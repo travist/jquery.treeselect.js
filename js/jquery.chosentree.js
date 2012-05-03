@@ -11,7 +11,7 @@
     params = $.extend({
       inputId: 'chosentree-select',  /** The input element ID and NAME. */
       width: 450,                    /** The width of this widget. */
-      title: '',                     /** The title to add to the input. */
+      label: '',                     /** The label to add to the input. */
       description: '',               /** The description to add to the input. */
       default_text: 'Select Item',   /** The default text within the input. */
       min_height: 100,               /** The miniumum height for the chosen. */
@@ -28,7 +28,7 @@
       var choices = null;
       var search = null;
       var input = null;
-      var title = null;
+      var label = null;
       var description = null;
       var treeselect = null;
       var treewrapper = null;
@@ -57,12 +57,12 @@
       search = $(document.createElement('li'));
       search.addClass('search-field');
 
-      // If they wish to have a title.
-      title = $(document.createElement('label'));
-      title.attr({
+      // If they wish to have a label.
+      label = $(document.createElement('label'));
+      label.attr({
         'for': params.inputId
       });
-      title.text(params.title);
+      label.text(params.label);
 
       // If they wish to have a description.
       description = $(document.createElement('div'));
@@ -90,7 +90,7 @@
       }
 
       // Creat the chosen selector.
-      selector.append(title).append(choices.append(search));
+      selector.append(label).append(choices.append(search));
 
       treewrapper = $(document.createElement('div'));
       treewrapper.addClass('treewrapper');

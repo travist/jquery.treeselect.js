@@ -16,7 +16,12 @@
     /**
      * Constructor.
      */
-    var TreeNode = function(nodeparams) {
+    var TreeNode = function(nodeparams, root) {
+
+      // Determine if this is a root item.
+      this.root = !!root;
+
+      // Setup the parameters.
       nodeparams.title = nodeparams.title || 'anonymous';
       $.extend(this, {
         id: 0,                /** The ID of this node. */
@@ -202,6 +207,23 @@
     };
 
     /**
+     * Check this node.
+     */
+    TreeNode.prototype.check = function(state) {
+
+      // Set the checked state.
+      this.checked = state;
+
+      // Make sure the input is checked accordingly.
+      this.input.attr('checked', state);
+
+      // Select this node.
+      if (params.selected) {
+        params.selected(this, true);
+      }
+    };
+
+    /**
      * Selects a node.
      */
     TreeNode.prototype.select = function(state, child) {
@@ -240,10 +262,8 @@
      */
     TreeNode.prototype.build_list = function() {
       var list = $();
-      if (this.id) {
-        list = $(document.createElement('li'));
-        list.addClass(this.odd ? 'odd' : 'even');
-      }
+      list = $(document.createElement('li'));
+      list.addClass(this.odd ? 'odd' : 'even');
       return list;
     };
 
@@ -251,29 +271,33 @@
      * Build the input and return.
      */
     TreeNode.prototype.build_input = function(left) {
-      if (this.id || params.selectAll) {
-        this.input = $(document.createElement('input'));
-        this.input.attr({
-          'type': 'checkbox',
-          'value': this.value || this.id,
-          'name': 'treeselect-' + this.id,
-          'checked': this.checked
-        });
-        this.input.css('left', left + 'px');
-        this.input.bind('click', (function(node) {
-          return function(event) {
+      this.input = $(document.createElement('input'));
+      this.input.attr({
+        'type': 'checkbox',
+        'value': this.value || this.id,
+        'name': 'treeselect-' + this.id,
+        'checked': this.checked
+      });
+      this.input.css('left', left + 'px');
+      this.input.bind('click', (function(node) {
+        return function(event) {
 
-            // Determine if the input is checked.
-            var checked = $(event.target).is(':checked');
+          // Determine if the input is checked.
+          var checked = $(event.target).is(':checked');
 
-            // Expand if checked.
-            node.expand(checked);
+          // Expand if checked.
+          node.expand(checked);
 
-            // Call the select method.
-            node.select(checked);
-          };
-        })(this));
+          // Call the select method.
+          node.select(checked);
+        };
+      })(this));
+
+      // If this is a root item, then just hide the input.
+      if (this.root) {
+        this.input.hide();
       }
+
       return this.input;
     };
 
@@ -293,7 +317,9 @@
      * Build the span +/- symbol.
      */
     TreeNode.prototype.build_span = function(left) {
-      if (this.id && this.has_children) {
+
+      // If we are not root, and we have children, show a +/- symbol.
+      if (!this.root && this.has_children) {
         this.span = this.build_link($(document.createElement('span')));
         this.span.css('left', left + 'px');
       }
@@ -304,10 +330,14 @@
      * Build the title link.
      */
     TreeNode.prototype.build_title = function(left) {
-      if (this.id && this.title) {
+
+      // If there is a title, then build it.
+      if (!this.root && this.title) {
         this.link = this.build_link($(document.createElement('a')));
         this.link.css('marginLeft', left + 'px').text(this.title);
       }
+
+      // Return the link.
       return this.link;
     };
 
@@ -372,10 +402,6 @@
         this.display.append(this.build_input(left));
       }
 
-      if (!this.id && params.selectAll && params.selectAllText) {
-        this.display.append('&nbsp;' + params.selectAllText);
-      }
-
       // Now create the +/- sign if needed.
       if (this.span.length == 0) {
         left += params.colwidth;
@@ -397,16 +423,58 @@
       return this.display;
     };
 
+    /**
+     * Returns the selectAll text if that applies to this node.
+     */
+    TreeNode.prototype.getSelectAll = function() {
+      if (this.root && this.selectAll) {
+        return this.selectAllText;
+      }
+      return false;
+    };
+
     // Iterate through each instance.
     return $(this).each(function() {
 
-      // Create a new tree node and load it.
+      // Get the tree node parameters.
       var treeParams = $.extend(params, {display: $(this)});
-      new TreeNode(treeParams).loadNode(function(node) {
+
+      // Create a root tree node and load it.
+      var root = new TreeNode(treeParams, true);
+
+      // Add a select all link.
+      var selectAll = root.getSelectAll();
+      if (selectAll !== false) {
+
+        // Create an input that will select all children if selected.
+        root.display.append($(document.createElement('input')).attr({
+          'type': 'checkbox'
+        }).bind('click', (function(node) {
+          return function(event) {
+            node.selectChildren($(event.target).is(':checked'));
+            if (params.selected) {
+              params.selected({}, true);
+            }
+          };
+        })(root)));
+
+        // If they provided select all text, add it here.
+        if (selectAll) {
+          var span = $(document.createElement('span')).html(selectAll);
+          root.display.append(span);
+        }
+      }
+
+      // Load the node.
+      root.loadNode(function(node) {
         if (node.checked) {
           node.select(node.checked);
         }
         node.expand(true);
+
+        if (node.value) {
+          node.check(true);
+        }
       });
     });
   };
@@ -424,7 +492,7 @@
     params = $.extend({
       inputId: 'chosentree-select',  /** The input element ID and NAME. */
       width: 450,                    /** The width of this widget. */
-      title: '',                     /** The title to add to the input. */
+      label: '',                     /** The label to add to the input. */
       description: '',               /** The description to add to the input. */
       default_text: 'Select Item',   /** The default text within the input. */
       min_height: 100,               /** The miniumum height for the chosen. */
@@ -441,7 +509,7 @@
       var choices = null;
       var search = null;
       var input = null;
-      var title = null;
+      var label = null;
       var description = null;
       var treeselect = null;
       var treewrapper = null;
@@ -470,12 +538,12 @@
       search = $(document.createElement('li'));
       search.addClass('search-field');
 
-      // If they wish to have a title.
-      title = $(document.createElement('label'));
-      title.attr({
+      // If they wish to have a label.
+      label = $(document.createElement('label'));
+      label.attr({
         'for': params.inputId
       });
-      title.text(params.title);
+      label.text(params.label);
 
       // If they wish to have a description.
       description = $(document.createElement('div'));
@@ -503,7 +571,7 @@
       }
 
       // Creat the chosen selector.
-      selector.append(title).append(choices.append(search));
+      selector.append(label).append(choices.append(search));
 
       treewrapper = $(document.createElement('div'));
       treewrapper.addClass('treewrapper');
