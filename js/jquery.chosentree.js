@@ -35,7 +35,7 @@
       var selectedTimer = 0;
 
       // Show or hide the tree.
-      function showTree(show, tween) {
+      var showTree = function(show, tween) {
         tween = tween || 'fast';
         if (show) {
           treewrapper.addClass('treevisible').show('fast');
@@ -43,7 +43,7 @@
         else {
           treewrapper.removeClass('treevisible').hide('fast');
         }
-      }
+      };
 
       // Create the selector element.
       selector = $(document.createElement('div'));
@@ -190,6 +190,9 @@
               // Add this to the choices.
               var more_text = params.more_text.replace('%num%', nodes.length);
               choices.moreorless(params.min_height, more_text);
+              if (!choices.div_expanded) {
+                showTree(true, null);
+              }
             }
 
             // If they wish to know when it is loaded.

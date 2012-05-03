@@ -6,6 +6,7 @@
     // Setup the default parameters for the tree select control.
     params = $.extend({
       colwidth: 18,               /** The width of the columns. */
+      default_value: {},          /** An array of default values. */
       selected: null,             /** Callback when an item is selected. */
       load: null,                 /** Callback to load new tree's */
       deepLoad: false,            /** Performs a deep load */
@@ -433,6 +434,36 @@
       return false;
     };
 
+    /**
+     * Sets the defaults for this node.
+     */
+    TreeNode.prototype.setDefault = function(defaults) {
+
+      // Make sure the defaults is set.
+      if (defaults) {
+
+        // Make sure we are loaded first.
+        this.loadNode(function(node) {
+
+          // If this default is set, then check it.
+          if (defaults.hasOwnProperty(node.value) ||
+              defaults.hasOwnProperty(node.id)) {
+
+            // Check this node.
+            node.check(true);
+          }
+
+          // Iterate through all the children and set their defaults.
+          var i = node.children.length;
+          while (i--) {
+
+            // Set this childs default value.
+            node.children[i].setDefault(defaults);
+          }
+        });
+      }
+    };
+
     // Iterate through each instance.
     return $(this).each(function() {
 
@@ -467,14 +498,17 @@
 
       // Load the node.
       root.loadNode(function(node) {
+
+        // If this node is checked, then check it.
         if (node.checked) {
           node.select(node.checked);
         }
+
+        // Expand this root node.
         node.expand(true);
 
-        if (node.value) {
-          node.check(true);
-        }
+        // Now set the defaults.
+        node.setDefault(params.default_value);
       });
     });
   };
@@ -516,7 +550,7 @@
       var selectedTimer = 0;
 
       // Show or hide the tree.
-      function showTree(show, tween) {
+      var showTree = function(show, tween) {
         tween = tween || 'fast';
         if (show) {
           treewrapper.addClass('treevisible').show('fast');
@@ -524,7 +558,7 @@
         else {
           treewrapper.removeClass('treevisible').hide('fast');
         }
-      }
+      };
 
       // Create the selector element.
       selector = $(document.createElement('div'));
@@ -671,6 +705,9 @@
               // Add this to the choices.
               var more_text = params.more_text.replace('%num%', nodes.length);
               choices.moreorless(params.min_height, more_text);
+              if (!choices.div_expanded) {
+                showTree(true, null);
+              }
             }
 
             // If they wish to know when it is loaded.
