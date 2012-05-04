@@ -76,8 +76,6 @@
         input = $(document.createElement('input'));
         input.attr({
           'type': 'text',
-          'name': params.inputId,
-          'id': params.inputId,
           'value': params.default_text,
           'class': 'default',
           'autocomplete': 'off'

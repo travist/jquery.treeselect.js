@@ -10,6 +10,7 @@
       selected: null,             /** Callback when an item is selected. */
       load: null,                 /** Callback to load new tree's */
       deepLoad: false,            /** Performs a deep load */
+      inputName: 'treeselect',    /** The input name. */
       selectAll: false,           /** If we wish to see a select all. */
       selectAllText: 'Select All' /** The select all text. */
     }, params);
@@ -272,11 +273,18 @@
      * Build the input and return.
      */
     TreeNode.prototype.build_input = function(left) {
+
+      // Create the input element.
       this.input = $(document.createElement('input'));
+
+      // Get the value for this input item.
+      var value = this.value || this.id;
+
+      // Create the attributes for this input item.
       this.input.attr({
         'type': 'checkbox',
-        'value': this.value || this.id,
-        'name': 'treeselect-' + this.id,
+        'value': value,
+        'name': params.inputName + '-' + value,
         'checked': this.checked
       });
       this.input.css('left', left + 'px');
@@ -591,8 +599,6 @@
         input = $(document.createElement('input'));
         input.attr({
           'type': 'text',
-          'name': params.inputId,
-          'id': params.inputId,
           'value': params.default_text,
           'class': 'default',
           'autocomplete': 'off'
