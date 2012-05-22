@@ -179,6 +179,11 @@
             // Show the choices.
             choices.show();
 
+            // Don't show the default value if the root has not children.
+            if (node.children.length == 0) {
+              input.attr({'value': ''});
+            }
+
             // Add the selected items to the choices.
             $('li.search-choice', choices).each(function() {
               chosentree.value[this.nodeData.id] = this.nodeData.value;
