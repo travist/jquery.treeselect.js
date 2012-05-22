@@ -30,7 +30,7 @@
         loaded: false,        /** Flag to see if this is loaded. */
         value: 0,             /** The input value for this node. */
         title: '',            /** The title of this node. */
-        has_children: true,   /** Boolean if this node has children. */
+        has_children: false,  /** Boolean if this node has children. */
         children: [],         /** Array of children. */
         level: 0,             /** The level of this node. */
         odd: false,           /** The odd/even state of this row. */
@@ -436,7 +436,7 @@
      * Returns the selectAll text if that applies to this node.
      */
     TreeNode.prototype.getSelectAll = function() {
-      if (this.root && this.selectAll) {
+      if (this.root && this.selectAll && this.has_children) {
         return this.selectAllText;
       }
       return false;
@@ -662,22 +662,25 @@
               var span = $(document.createElement('span'));
               span.text(node.title);
 
-              var close = $(document.createElement('a'));
-              close.addClass('search-choice-close');
-              close.attr('href', 'javascript:void(0)');
+              // Don't allow them to remove the root element.
+              if (!root) {
+                var close = $(document.createElement('a'));
+                close.addClass('search-choice-close');
+                close.attr('href', 'javascript:void(0)');
 
-              // Bind when someone clicks on the close button.
-              close.bind('click', function(event) {
+                // Bind when someone clicks on the close button.
+                close.bind('click', function(event) {
 
-                // Prevent the default.
-                event.preventDefault();
+                  // Prevent the default.
+                  event.preventDefault();
 
-                // Remove the choice.
-                $('li#choice_' + node.id, choices).remove();
+                  // Remove the choice.
+                  $('li#choice_' + node.id, choices).remove();
 
-                // Deselect this node.
-                node.select(false);
-              });
+                  // Deselect this node.
+                  node.select(false);
+                });
+              }
 
               // Add this to the choices.
               search.before(choice.append(span).append(close));

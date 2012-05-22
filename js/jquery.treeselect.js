@@ -30,7 +30,7 @@
         loaded: false,        /** Flag to see if this is loaded. */
         value: 0,             /** The input value for this node. */
         title: '',            /** The title of this node. */
-        has_children: true,   /** Boolean if this node has children. */
+        has_children: false,  /** Boolean if this node has children. */
         children: [],         /** Array of children. */
         level: 0,             /** The level of this node. */
         odd: false,           /** The odd/even state of this row. */
@@ -436,7 +436,7 @@
      * Returns the selectAll text if that applies to this node.
      */
     TreeNode.prototype.getSelectAll = function() {
-      if (this.root && this.selectAll) {
+      if (this.root && this.selectAll && this.has_children) {
         return this.selectAllText;
       }
       return false;

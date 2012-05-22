@@ -139,22 +139,25 @@
               var span = $(document.createElement('span'));
               span.text(node.title);
 
-              var close = $(document.createElement('a'));
-              close.addClass('search-choice-close');
-              close.attr('href', 'javascript:void(0)');
+              // Don't allow them to remove the root element.
+              if (!root) {
+                var close = $(document.createElement('a'));
+                close.addClass('search-choice-close');
+                close.attr('href', 'javascript:void(0)');
 
-              // Bind when someone clicks on the close button.
-              close.bind('click', function(event) {
+                // Bind when someone clicks on the close button.
+                close.bind('click', function(event) {
 
-                // Prevent the default.
-                event.preventDefault();
+                  // Prevent the default.
+                  event.preventDefault();
 
-                // Remove the choice.
-                $('li#choice_' + node.id, choices).remove();
+                  // Remove the choice.
+                  $('li#choice_' + node.id, choices).remove();
 
-                // Deselect this node.
-                node.select(false);
-              });
+                  // Deselect this node.
+                  node.select(false);
+                });
+              }
 
               // Add this to the choices.
               search.before(choice.append(span).append(close));
