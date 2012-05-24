@@ -15,6 +15,9 @@
       selectAllText: 'Select All' /** The select all text. */
     }, params);
 
+    /** Keep track of all loaded nodes */
+    var loadedNodes = {};
+
     /**
      * Constructor.
      */
@@ -82,6 +85,7 @@
      */
     TreeNode.prototype.isLoaded = function() {
       var loaded = this.loaded;
+      loaded |= loadedNodes.hasOwnProperty(this.id);
       loaded |= !this.has_children;
       loaded |= (this.has_children && this.children.length > 0);
       return loaded;
@@ -105,6 +109,9 @@
 
           // Say this node is loaded.
           node.loaded = true;
+
+          // Add to the loaded nodes array.
+          loadedNodes[node.id] = node.id;
 
           // Build the node.
           node.build();
@@ -492,7 +499,7 @@
           return function(event) {
             node.selectChildren($(event.target).is(':checked'));
             if (params.selected) {
-              params.selected({}, true);
+              params.selected(node, true);
             }
           };
         })(root)));
@@ -709,7 +716,7 @@
             choices.show();
 
             // Don't show the default value if the root has not children.
-            if (node.children.length == 0) {
+            if (input && node.children.length == 0) {
               input.attr({'value': ''});
             }
 

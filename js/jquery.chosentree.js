@@ -180,7 +180,7 @@
             choices.show();
 
             // Don't show the default value if the root has not children.
-            if (node.children.length == 0) {
+            if (input && node.children.length == 0) {
               input.attr({'value': ''});
             }
 
