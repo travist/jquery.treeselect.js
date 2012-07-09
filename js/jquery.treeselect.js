@@ -10,6 +10,7 @@
       selected: null,             /** Callback when an item is selected. */
       load: null,                 /** Callback to load new tree's */
       deepLoad: false,            /** Performs a deep load */
+      onbuild: null,              /** Called when each node is building. */
       inputName: 'treeselect',    /** The input name. */
       selectAll: false,           /** If we wish to see a select all. */
       selectAllText: 'Select All' /** The select all text. */
@@ -440,6 +441,11 @@
       // Append the children.
       if (this.childlist.length == 0) {
         this.display.append(this.build_children());
+      }
+
+      // See if they wish to alter the build.
+      if (params.onbuild) {
+        params.onbuild(this);
       }
 
       // Return the display.
