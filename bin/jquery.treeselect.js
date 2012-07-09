@@ -281,39 +281,42 @@
      */
     TreeNode.prototype.build_input = function(left) {
 
-      // Create the input element.
-      this.input = $(document.createElement('input'));
+      // Only add an input if the input name is defined.
+      if (params.inputName) {
 
-      // Get the value for this input item.
-      var value = this.value || this.id;
+        // Create the input element.
+        this.input = $(document.createElement('input'));
 
-      // Create the attributes for this input item.
-      this.input.attr({
-        'type': 'checkbox',
-        'value': value,
-        'name': params.inputName + '-' + value,
-        'checked': this.checked
-      });
-      this.input.css('left', left + 'px');
-      this.input.bind('click', (function(node) {
-        return function(event) {
+        // Get the value for this input item.
+        var value = this.value || this.id;
 
-          // Determine if the input is checked.
-          var checked = $(event.target).is(':checked');
+        // Create the attributes for this input item.
+        this.input.attr({
+          'type': 'checkbox',
+          'value': value,
+          'name': params.inputName + '-' + value,
+          'checked': this.checked
+        });
+        this.input.css('left', left + 'px');
+        this.input.bind('click', (function(node) {
+          return function(event) {
 
-          // Expand if checked.
-          node.expand(checked);
+            // Determine if the input is checked.
+            var checked = $(event.target).is(':checked');
 
-          // Call the select method.
-          node.select(checked);
-        };
-      })(this));
+            // Expand if checked.
+            node.expand(checked);
 
-      // If this is a root item, then just hide the input.
-      if (this.root) {
-        this.input.hide();
+            // Call the select method.
+            node.select(checked);
+          };
+        })(this));
+
+        // If this is a root item, then just hide the input.
+        if (this.root) {
+          this.input.hide();
+        }
       }
-
       return this.input;
     };
 
@@ -406,7 +409,7 @@
     TreeNode.prototype.build = function() {
 
       // Keep track of the left margin for each element.
-      var left = 0;
+      var left = 0, elem = null;
 
       // Create the list display.
       if (this.display.length == 0) {
@@ -414,19 +417,23 @@
       }
 
       // Now append the input.
-      if (this.input.length == 0) {
-        this.display.append(this.build_input(left));
+      if ((this.input.length == 0) &&
+          (elem = this.build_input(left)) &&
+          (elem.length > 0)) {
+
+        // Add the input to the display.
+        this.display.append(elem);
+        left += params.colwidth;
       }
 
       // Now create the +/- sign if needed.
       if (this.span.length == 0) {
-        left += params.colwidth;
         this.display.append(this.build_span(left));
+        left += params.colwidth;
       }
 
       // Now append the node title.
       if (this.link.length == 0) {
-        left += params.colwidth;
         this.display.append(this.build_title(left));
       }
 
