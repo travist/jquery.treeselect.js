@@ -36,6 +36,7 @@
         title: '',            /** The title of this node. */
         has_children: true,   /** Boolean if this node has children. */
         children: [],         /** Array of children. */
+        data: {},             /** Additional data to attach to the node. */
         level: 0,             /** The level of this node. */
         odd: false,           /** The odd/even state of this row. */
         checked: false,       /** If this node is checked. */
