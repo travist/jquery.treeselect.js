@@ -454,7 +454,7 @@
     TreeNode.prototype.setDefault = function(defaults) {
 
       // Make sure the defaults is set.
-      if (defaults) {
+      if (!jQuery.isEmptyObject(defaults)) {
 
         // Make sure we are loaded first.
         this.loadNode(function(node) {

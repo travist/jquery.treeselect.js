@@ -7,7 +7,7 @@
     <meta name="description" content="jquery.treeselect.js : A minimalistic jQuery hierarchy select widget used for selecting hierarchy structures in a treeview format." />
     <script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"></script>
     <script type='text/javascript' src='lib/jquery.moreorless.js/jquery.moreorless.js'></script>
-    <script type='text/javascript' src='js/jquery.treeselect.js'></script>
+    <script type='text/javascript' src='js/jquery.treeselect.js?random=12324234'></script>
     <script type='text/javascript' src='js/jquery.chosentree.js'></script>
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
     <link rel='stylesheet' type='text/css' href='lib/jquery.moreorless.js/moreorless.css' />
@@ -15,21 +15,20 @@
     <link rel='stylesheet' type='text/css' href='css/chosen.css' />
     <script type='text/javascript'>
       jQuery(function() {
-
-        var baseLevel = 0;
-        var maxLevel = 0;
+        var maxDepth = 8;
         function loadChildren(node, level) {
-          baseLevel = level = level || baseLevel;
+          var hasChildren = node.level < maxDepth;
           for (var i=0; i<2; i++) {
             var id = node.id + (i+1).toString();
             node.children.push({
               id:id,
               title:'Node ' + id,
-              has_children:(baseLevel < 4),
+              has_children:hasChildren,
+              level: node.level + 1,
               children:[]
             });
-            if (level < maxLevel) {
-              loadChildren(node.children[i], (level + 1));
+            if (hasChildren && level < 2) {
+              loadChildren(node.children[i], (level+1));
             }
           }
           return node;
@@ -37,14 +36,15 @@
 
         $('div.chosentree').chosentree({
           width: 500,
+          deepLoad: false,
           load: function(node, callback) {
+            console.log(node);
             /**
              * This would typically be replaced with an jQuery.ajax where
              * you would return the tree structure for the provided node.
              */
             setTimeout(function() {
-              maxLevel = baseLevel+1;
-              callback(loadChildren(node));
+              callback(loadChildren(node, 0));
             }, 1000);
           }
         });
@@ -97,7 +97,7 @@ tool of those items.</p>
     jQuery(function() {
       $('div.chosentree').chosentree({
         width: 500,
-        deepLoad: true,
+        deepLoad: false,
         load: function(node, callback) {
           /**
            * This would typically call jQuery.ajax to load a new node
