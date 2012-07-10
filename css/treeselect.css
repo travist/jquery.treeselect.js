@@ -86,10 +86,8 @@
   background:url(images/expanded.gif) no-repeat 0 0;
 }
 
-.treeselect div.treebusy {
-  background:url(images/throbber.gif) no-repeat 0 5px !important;
+.treeselect .treebusy {
+  background:url(images/throbber.gif) no-repeat 0 0 !important;
   width:50px;
   height:20px;
-  margin-left:5px;
-  padding-left:18px;
 }

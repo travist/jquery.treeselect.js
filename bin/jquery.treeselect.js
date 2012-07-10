@@ -55,28 +55,13 @@
      * Set the busy cursor for this node.
      */
     TreeNode.prototype.setBusy = function(state) {
-      if (state != this.busy) {
+      if (state != this.span.hasClass('treebusy')) {
         this.busy = state;
         if (state) {
-
-          // Create the busy cursor.
-          var busy = $(document.createElement('div')).addClass('treebusy');
-          busy.text('loading...');
-
-          // If the list exists, then add it before that, otherwise append it
-          // to the display.
-          var list = $('ul', this.display);
-          if (list.length == 0) {
-            this.display.append(busy);
-          }
-          else {
-            list.prepend(busy);
-          }
+          this.span.addClass('treebusy');
         }
         else {
-
-          // Remove the busy cursor.
-          $('div.treebusy', this.display).remove();
+          this.span.removeClass('treebusy');
         }
       }
     };
@@ -410,7 +395,7 @@
     TreeNode.prototype.build = function() {
 
       // Keep track of the left margin for each element.
-      var left = 0, elem = null;
+      var left = 5, elem = null;
 
       // Create the list display.
       if (this.display.length == 0) {
