@@ -15,6 +15,7 @@
 }
 
 .treeselect a {
+  display: inline-block;
   text-decoration:none;
   color:#057fac;
 }
@@ -63,7 +64,7 @@
   font-size:0;
 }
 
-.treeselect li span {
+.treeselect li span.treeselect-expand {
   float:left;
   position:absolute;
   top:6px;
@@ -78,16 +79,16 @@
   margin-left: 18px;
 }
 
-.treeselect li span, .treeselect li span.collapsed {
+.treeselect li span.treeselect-expand, .treeselect li span.treeselect-expand.collapsed {
   background:url(images/collapsed.gif) no-repeat 0 0;
 }
 
-.treeselect li span.expanded {
+.treeselect li span.treeselect-expand.expanded {
   background:url(images/expanded.gif) no-repeat 0 0;
 }
 
 .treeselect .treebusy {
   background:url(images/throbber.gif) no-repeat 0 0 !important;
-  width:50px;
-  height:20px;
+  width:16px;
+  height:10px;
 }

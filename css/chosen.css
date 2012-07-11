@@ -365,3 +365,7 @@
   padding: 4px 5px 4px 20px;
 }
 /* @end */
+
+.chosentree-selector.chzn-container-single .chzn-search {
+  padding: 0;
+}

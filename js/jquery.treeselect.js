@@ -8,6 +8,7 @@
       colwidth: 18,               /** The width of the columns. */
       default_value: {},          /** An array of default values. */
       selected: null,             /** Callback when an item is selected. */
+      treeloaded: null,           /** Called when the tree is loaded. */
       load: null,                 /** Callback to load new tree's */
       deepLoad: false,            /** Performs a deep load */
       onbuild: null,              /** Called when each node is building. */
@@ -31,7 +32,8 @@
       nodeparams.title = nodeparams.title || 'anonymous';
       $.extend(this, {
         id: 0,                /** The ID of this node. */
-        loaded: false,        /** Flag to see if this is loaded. */
+        nodeloaded: false,    /** Flag to see if this node is loaded. */
+        allLoaded: false,     /** Flag to see if we have loaded all nodes. */
         value: 0,             /** The input value for this node. */
         title: '',            /** The title of this node. */
         has_children: true,   /** Boolean if this node has children. */
@@ -71,7 +73,7 @@
      * Determines if this node is already loaded.
      */
     TreeNode.prototype.isLoaded = function() {
-      var loaded = this.loaded;
+      var loaded = this.nodeloaded;
       loaded |= loadedNodes.hasOwnProperty(this.id);
       loaded |= !this.has_children;
       loaded |= (this.has_children && this.children.length > 0);
@@ -83,19 +85,21 @@
      *
      * @param {function} callback - The callback when the node is loaded.
      */
-    TreeNode.prototype.loadNode = function(callback) {
+    TreeNode.prototype.loadNode = function(callback, hideBusy) {
 
       // Only load if we have not loaded yet.
       if (params.load && !this.isLoaded()) {
 
         // Make this node busy.
-        this.setBusy(true);
+        if (!hideBusy) {
+          this.setBusy(true);
+        }
 
         // Call the load function.
         params.load(this, function(node) {
 
           // Say this node is loaded.
-          node.loaded = true;
+          node.nodeloaded = true;
 
           // Add to the loaded nodes array.
           loadedNodes[node.id] = node.id;
@@ -109,7 +113,9 @@
           }
 
           // Say we are not busy.
-          node.setBusy(false);
+          if (!hideBusy) {
+            node.setBusy(false);
+          }
         });
       }
       else if (callback) {
@@ -121,23 +127,35 @@
 
     /**
      * Recursively loads and builds all nodes beneath this node.
+     *
+     * @param {function} callback Called when the tree has loaded.
+     * @param {function} operation Allow someone to perform an operation.
      */
-    TreeNode.prototype.loadAll = function(callback) {
+    TreeNode.prototype.loadAll = function(callback, operation, hideBusy) {
 
       // Make sure we are loaded first.
       this.loadNode(function(node) {
+
+        // See if an operation needs to be performed.
+        if (operation) {
+          operation(node);
+        }
 
         // Get our children count.
         var i = node.children.length, count = i;
 
         // If no children, then just call the callback immediately.
         if (!i) {
-          callback(node);
+          if (callback) {
+            callback(node);
+          }
           return;
         }
 
         // Make this node busy.
-        node.setBusy(true);
+        if (!hideBusy) {
+          node.setBusy(true);
+        }
 
         // Iterate through each child.
         while (i--) {
@@ -149,15 +167,19 @@
             count--;
 
             // If all children are done loading, call the callback.
-            if (callback && !count) {
+            if (!count) {
 
               // Callback that we are done loading this tree.
-              callback(node);
+              if (callback) {
+                callback(node);
+              }
 
               // Make this node busy.
-              node.setBusy(false);
+              if (!hideBusy) {
+                node.setBusy(false);
+              }
             }
-          });
+          }, operation, hideBusy);
         }
       });
     };
@@ -326,7 +348,9 @@
 
       // If we are not root, and we have children, show a +/- symbol.
       if (!this.root && this.has_children) {
-        this.span = this.build_link($(document.createElement('span')));
+        this.span = this.build_link($(document.createElement('span')).attr({
+          'class': 'treeselect-expand'
+        }));
         this.span.css('left', left + 'px');
       }
       return this.span;
@@ -339,7 +363,9 @@
 
       // If there is a title, then build it.
       if (!this.root && this.title) {
-        this.link = this.build_link($(document.createElement('a')));
+        this.link = this.build_link($(document.createElement('a')).attr({
+          'class': 'treeselect-title'
+        }));
         this.link.css('marginLeft', left + 'px').text(this.title);
       }
 
@@ -450,32 +476,49 @@
 
     /**
      * Sets the defaults for this node.
+     *
+     * @param {function} callback Called all defaults are set.
      */
-    TreeNode.prototype.setDefault = function(defaults) {
+    TreeNode.prototype.setDefault = function(defaults, callback) {
 
       // Make sure the defaults is set.
       if (!jQuery.isEmptyObject(defaults)) {
 
-        // Make sure we are loaded first.
-        this.loadNode(function(node) {
-
-          // If this default is set, then check it.
+        // Load all nodes and apply a default to them.
+        this.loadAll(function(node) {
+          if (callback) {
+            callback(node);
+          }
+        }, function(node) {
           if (defaults.hasOwnProperty(node.value) ||
               defaults.hasOwnProperty(node.id)) {
-
-            // Check this node.
             node.check(true);
-          }
-
-          // Iterate through all the children and set their defaults.
-          var i = node.children.length;
-          while (i--) {
-
-            // Set this childs default value.
-            node.children[i].setDefault(defaults);
           }
         });
       }
+      else if (callback) {
+        callback(this);
+      }
+    };
+
+    /**
+     * Search this node for matching text.
+     *
+     * @param {string} text The text to search for.
+     * @param {function} callback Called with the results of this search.
+     */
+    TreeNode.prototype.search = function(text, callback) {
+      var results = {};
+      text = text.toLowerCase();
+      this.loadAll(function(node) {
+        if (callback) {
+          callback(results);
+        }
+      }, function(node) {
+        if (node.title.toLowerCase().search(text) !== -1) {
+          results[node.id] = node;
+        }
+      }, true);
     };
 
     // Iterate through each instance.
@@ -485,7 +528,7 @@
       var treeParams = $.extend(params, {display: $(this)});
 
       // Create a root tree node and load it.
-      var root = new TreeNode(treeParams, true);
+      var root = this.treenode = new TreeNode(treeParams, true);
 
       // Add a select all link.
       var selectAll = root.getSelectAll();
@@ -528,7 +571,11 @@
         node.expand(true);
 
         // Now set the defaults.
-        node.setDefault(params.default_value);
+        node.setDefault(params.default_value, function(node) {
+          if (params.treeloaded) {
+            params.treeloaded(node);
+          }
+        });
       });
     });
   };

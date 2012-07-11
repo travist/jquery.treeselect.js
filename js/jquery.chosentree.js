@@ -9,15 +9,17 @@
 
     // Setup the default parameters.
     params = $.extend({
-      inputId: 'chosentree-select',  /** The input element ID and NAME. */
-      width: 450,                    /** The width of this widget. */
-      label: '',                     /** The label to add to the input. */
-      description: '',               /** The description to add to the input. */
-      default_text: 'Select Item',   /** The default text within the input. */
-      min_height: 100,               /** The miniumum height for the chosen. */
-      more_text: '+%num% more',      /** The text to show in the more. */
-      loaded: null,                  /** Called when all items are loaded. */
-      collapsed: true                /** If the tree should be collapsed. */
+      inputId: 'chosentree-select',     /** The input element ID and NAME. */
+      width: 450,                       /** The width of this widget. */
+      label: '',                        /** The label to add to the input. */
+      description: '',                  /** The description for the input. */
+      input_placeholder: 'Select Item', /** The input placeholder text. */
+      input_type: 'text',               /** Define the input type. */
+      min_height: 100,                  /** The miniumum height. */
+      more_text: '+%num% more',         /** The text to show in the more. */
+      loaded: null,                     /** Called when all items are loaded. */
+      collapsed: true,                  /** If the tree should be collapsed. */
+      showtree: false                   /** To show the tree. */
     }, params);
 
     // Iterate through each instance.
@@ -27,8 +29,10 @@
       var selector = null;
       var choices = null;
       var search = null;
+      var search_results = null;
       var input = null;
       var label = null;
+      var loading = null;
       var description = null;
       var treeselect = null;
       var treewrapper = null;
@@ -47,15 +51,24 @@
 
       // Create the selector element.
       selector = $(document.createElement('div'));
-      selector.addClass('chzn-container chzn-container-multi');
+      selector.addClass('chosentree-selector chzn-container');
+      if (params.input_type == 'search') {
+        selector.addClass('chzn-container-single');
+        search = $(document.createElement('div'));
+        search.addClass('chzn-search');
+      }
+      else {
+        selector.addClass('chzn-container-multi');
+        choices = $(document.createElement('ul'));
+        choices.addClass('chzn-choices chosentree-choices');
+        search = $(document.createElement('li'));
+        search.addClass('search-field');
+      }
 
-      // Create the choices.
-      choices = $(document.createElement('ul'));
-      choices.addClass('chzn-choices chosentree-choices');
-
-      // Create the search element.
-      search = $(document.createElement('li'));
-      search.addClass('search-field');
+      // Create the search results.
+      search_results = $(document.createElement('div'));
+      search_results.addClass('chosentree-search-results');
+      search_results.hide();
 
       // If they wish to have a label.
       label = $(document.createElement('label'));
@@ -72,28 +85,69 @@
       description.text(params.description);
 
       // Create the input element.
-      if (params.default_text) {
+      if (params.input_placeholder) {
         input = $(document.createElement('input'));
         input.attr({
           'type': 'text',
-          'value': params.default_text,
-          'class': 'default',
+          'placeholder': params.input_placeholder,
           'autocomplete': 'off'
         });
-        input.css('width', '100%');
-        input.focus(function(event) {
-          showTree(true);
-        });
+        if (!params.showtree && params.collapsed) {
+          input.focus(function(event) {
+            showTree(true);
+          });
+        }
+
+        // Add a results item to the input.
+        if (params.input_type == 'search') {
+
+          // Need to make room for the search symbol.
+          input.width(params.width - 19);
+          input.addClass('chosentree-search');
+          input.bind('input', function() {
+            var value = $(this).val();
+            if (value) {
+              // Search the treenode.
+              var node = treeselect.eq(0)[0].treenode;
+              if (node) {
+                node.search(value, function(nodes) {
+                  console.log(nodes);
+                });
+              }
+              //search_results.slidedown();
+            }
+            else {
+              //search_results.slideup();
+            }
+          });
+        }
+        else {
+
+          // Set the width and add the results class.
+          input.width(params.width);
+          input.addClass('chosentree-results');
+        }
+
         search.append(input);
       }
 
       // Creat the chosen selector.
-      selector.append(label).append(choices.append(search));
+      if (choices) {
+        selector.append(label).append(choices.append(search));
+      }
+      else {
+        selector.append(label).append(search);
+      }
 
       treewrapper = $(document.createElement('div'));
       treewrapper.addClass('treewrapper');
       treewrapper.css('width', params.width + 'px');
       treewrapper.hide();
+
+      // Create a loading span.
+      loading = $(document.createElement('span')).attr({
+        'class': 'tree-loading treebusy'
+      }).css('display', 'block');
 
       // Get the tree select.
       treeselect = $(document.createElement('div'));
@@ -107,7 +161,9 @@
       });
 
       // Add the treeselect widget.
-      $(this).append(selector.append(treewrapper.append(treeselect)));
+      treewrapper.append(search_results);
+      treewrapper.append(treeselect.append(loading));
+      $(this).append(selector.append(treewrapper));
 
       // Add the description.
       $(this).append(description);
@@ -214,12 +270,21 @@
         };
       })(this);
 
+      // Add the treeloaded event.
+      treeparams.treeloaded = function(node) {
+        loading.remove();
+      };
+
       // Now declare our treeselect control.
-      $(treeselect).treeselect(treeparams);
+      treeselect.treeselect(treeparams);
+
+      // Don't show the choices.
+      if (choices && !treeparams.collapsed) {
+        choices.hide();
+      }
 
       // Show the tree by default.
-      if (!treeparams.collapsed) {
-        choices.hide();
+      if (treeparams.showtree || !treeparams.collapsed) {
         showTree(true, null);
       }
     });
