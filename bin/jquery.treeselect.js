@@ -703,32 +703,48 @@
           // Keep track of a search timeout.
           var searchTimeout = 0;
 
+          // Setup a variable to keep track of inputs.
+          var inputValue = '';
+
           // Bind to the input when they type.
           input.bind('input', function inputSearch() {
 
+            // Get the input value.
+            inputValue = input.val();
+
             // We want to make sure we don't try while it is searching...
-            if (!input.hasClass('searching')) {
+            // And also don't want to search if the input is one character...
+            if (!input.hasClass('searching') && (inputValue.length !== 1)) {
 
               // Continue if we have a root node.
               if (root) {
-                // Get the input value.
-                var value = $(this).val();
 
                 // Say that we are now searching...
                 input.addClass('searching');
 
                 // Search the tree node.
-                root.search(value, function(nodes) {
+                root.search(inputValue, (function(oldValue) {
+                  return function(nodes) {
 
-                  // Say we are no longer searching...
-                  input.removeClass('searching');
+                    // Say we are no longer searching...
+                    input.removeClass('searching');
 
-                  // Iterate over the nodes and append them to the search.
-                  root.childlist.children().detach();
-                  for (var i in nodes) {
-                    root.childlist.append(nodes[i].display);
-                  }
-                });
+                    // If the old value is different than the new value.
+                    if (inputValue != oldValue) {
+
+                      // Run the search with the new value.
+                      inputSearch();
+                    }
+                    else {
+
+                      // Iterate over the nodes and append them to the search.
+                      root.childlist.children().detach();
+                      for (var i in nodes) {
+                        root.childlist.append(nodes[i].display);
+                      }
+                    }
+                  };
+                })(inputValue));
               }
             }
             else {
