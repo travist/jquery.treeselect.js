@@ -1,12 +1,12 @@
 /* @group Base */
-.chzn-container {
+.chzntree-container {
   font-size: 13px;
   position: relative;
   display: inline-block;
   zoom: 1;
   *display: inline;
 }
-.chzn-container .chzn-drop {
+.chzntree-container .chzntree-drop {
   background: #fff;
   border: 1px solid #aaa;
   border-top: 0;
@@ -22,7 +22,7 @@
 /* @end */
 
 /* @group Single Chosen */
-.chzn-container-single .chzn-single {
+.chzntree-container-single .chzntree-single {
   background-color: #fff;
   background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eeeeee), color-stop(0.5, white));
   background-image: -webkit-linear-gradient(center bottom, #eeeeee 0%, white 50%);
@@ -48,7 +48,7 @@
   color: #444;
   text-decoration: none;
 }
-.chzn-container-single .chzn-single span {
+.chzntree-container-single .chzntree-single span {
   margin-right: 26px;
   display: block;
   overflow: hidden;
@@ -57,7 +57,7 @@
   -ms-text-overflow: ellipsis;
   text-overflow: ellipsis;
 }
-.chzn-container-single .chzn-single abbr {
+.chzntree-container-single .chzntree-single abbr {
   display: block;
   position: absolute;
   right: 26px;
@@ -67,10 +67,10 @@
   font-size: 1px;
   background: url(http://harvesthq.github.com/chosen/chosen/chosen-sprite.png) right top no-repeat;
 }
-.chzn-container-single .chzn-single abbr:hover {
+.chzntree-container-single .chzntree-single abbr:hover {
   background-position: right -11px;
 }
-.chzn-container-single .chzn-single div {
+.chzntree-container-single .chzntree-single div {
   -webkit-border-radius: 0 4px 4px 0;
   -moz-border-radius   : 0 4px 4px 0;
   border-radius        : 0 4px 4px 0;
@@ -93,20 +93,20 @@
   height: 100%;
   width: 18px;
 }
-.chzn-container-single .chzn-single div b {
+.chzntree-container-single .chzntree-single div b {
   background: url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 0 1px;
   display: block;
   width: 100%;
   height: 100%;
 }
-.chzn-container-single .chzn-search {
+.chzntree-container-single .chzntree-search {
   padding: 3px 4px;
   position: relative;
   margin: 0;
   white-space: nowrap;
   z-index: 1010;
 }
-.chzn-container-single .chzn-search input {
+.chzntree-container-single .chzntree-search input {
   background: #fff url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 100% -22px;
   background: url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 100% -22px, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, white), color-stop(0.99, #eeeeee));
   background: url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 100% -22px, -webkit-linear-gradient(center bottom, white 85%, #eeeeee 99%);
@@ -121,7 +121,7 @@
   font-family: sans-serif;
   font-size: 1em;
 }
-.chzn-container-single .chzn-drop {
+.chzntree-container-single .chzntree-drop {
   -webkit-border-radius: 0 0 4px 4px;
   -moz-border-radius   : 0 0 4px 4px;
   border-radius        : 0 0 4px 4px;
@@ -131,13 +131,13 @@
 }
 /* @end */
 
-.chzn-container-single-nosearch .chzn-search input {
+.chzntree-container-single-nosearch .chzntree-search input {
   position: absolute;
   left: -9000px;
 }
 
 /* @group Multi Chosen */
-.chzn-container-multi .chzn-choices {
+.chzntree-container-multi .chzntree-choices {
   background-color: #fff;
   background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.85, white), color-stop(0.99, #eeeeee));
   background-image: -webkit-linear-gradient(center bottom, white 85%, #eeeeee 99%);
@@ -155,16 +155,16 @@
   height: 1%;
   position: relative;
 }
-.chzn-container-multi .chzn-choices li {
+.chzntree-container-multi .chzntree-choices li {
   float: left;
   list-style: none;
 }
-.chzn-container-multi .chzn-choices .search-field {
+.chzntree-container-multi .chzntree-choices .search-field {
   white-space: nowrap;
   margin: 0;
   padding: 0;
 }
-.chzn-container-multi .chzn-choices .search-field input {
+.chzntree-container-multi .chzntree-choices .search-field input {
   color: #666;
   background: transparent !important;
   border: 0 !important;
@@ -176,10 +176,10 @@
   -o-box-shadow     : none;
   box-shadow        : none;
 }
-.chzn-container-multi .chzn-choices .search-field .default {
+.chzntree-container-multi .chzntree-choices .search-field .default {
   color: #999;
 }
-.chzn-container-multi .chzn-choices .search-choice {
+.chzntree-container-multi .chzntree-choices .search-choice {
   -webkit-border-radius: 3px;
   -moz-border-radius   : 3px;
   border-radius        : 3px;
@@ -201,13 +201,13 @@
   margin: 3px 0 3px 5px;
   position: relative;
 }
-.chzn-container-multi .chzn-choices .search-choice span {
+.chzntree-container-multi .chzntree-choices .search-choice span {
   cursor: default;
 }
-.chzn-container-multi .chzn-choices .search-choice-focus {
+.chzntree-container-multi .chzntree-choices .search-choice-focus {
   background: #d4d4d4;
 }
-.chzn-container-multi .chzn-choices .search-choice .search-choice-close {
+.chzntree-container-multi .chzntree-choices .search-choice .search-choice-close {
   display: block;
   position: absolute;
   right: 3px;
@@ -217,16 +217,16 @@
   font-size: 1px;
   background: url(http://harvesthq.github.com/chosen/chosen/chosen-sprite.png) right top no-repeat;
 }
-.chzn-container-multi .chzn-choices .search-choice .search-choice-close:hover {
+.chzntree-container-multi .chzntree-choices .search-choice .search-choice-close:hover {
   background-position: right -11px;
 }
-.chzn-container-multi .chzn-choices .search-choice-focus .search-choice-close {
+.chzntree-container-multi .chzntree-choices .search-choice-focus .search-choice-close {
   background-position: right -11px;
 }
 /* @end */
 
 /* @group Results */
-.chzn-container .chzn-results {
+.chzntree-container .chzntree-results {
   margin: 0 4px 4px 0;
   max-height: 190px;
   padding: 0 0 0 4px;
@@ -234,58 +234,58 @@
   overflow-x: hidden;
   overflow-y: auto;
 }
-.chzn-container-multi .chzn-results {
+.chzntree-container-multi .chzntree-results {
   margin: -1px 0 0;
   padding: 0;
 }
-.chzn-container .chzn-results li {
+.chzntree-container .chzntree-results li {
   display: none;
   line-height: 80%;
   padding: 7px 7px 8px;
   margin: 0;
   list-style: none;
 }
-.chzn-container .chzn-results .active-result {
+.chzntree-container .chzntree-results .active-result {
   cursor: pointer;
   display: list-item;
 }
-.chzn-container .chzn-results .highlighted {
+.chzntree-container .chzntree-results .highlighted {
   background: #3875d7;
   color: #fff;
 }
-.chzn-container .chzn-results li em {
+.chzntree-container .chzntree-results li em {
   background: #feffde;
   font-style: normal;
 }
-.chzn-container .chzn-results .highlighted em {
+.chzntree-container .chzntree-results .highlighted em {
   background: transparent;
 }
-.chzn-container .chzn-results .no-results {
+.chzntree-container .chzntree-results .no-results {
   background: #f4f4f4;
   display: list-item;
 }
-.chzn-container .chzn-results .group-result {
+.chzntree-container .chzntree-results .group-result {
   cursor: default;
   color: #999;
   font-weight: bold;
 }
-.chzn-container .chzn-results .group-option {
+.chzntree-container .chzntree-results .group-option {
   padding-left: 20px;
 }
-.chzn-container-multi .chzn-drop .result-selected {
+.chzntree-container-multi .chzntree-drop .result-selected {
   display: none;
 }
 /* @end */
 
 /* @group Active  */
-.chzn-container-active .chzn-single {
+.chzntree-container-active .chzntree-single {
   -webkit-box-shadow: 0 0 5px rgba(0,0,0,.3);
   -moz-box-shadow   : 0 0 5px rgba(0,0,0,.3);
   -o-box-shadow     : 0 0 5px rgba(0,0,0,.3);
   box-shadow        : 0 0 5px rgba(0,0,0,.3);
   border: 1px solid #5897fb;
 }
-.chzn-container-active .chzn-single-with-drop {
+.chzntree-container-active .chzntree-single-with-drop {
   border: 1px solid #aaa;
   -webkit-box-shadow: 0 1px 0 #fff inset;
   -moz-box-shadow   : 0 1px 0 #fff inset;
@@ -306,55 +306,55 @@
   border-bottom-left-radius : 0;
   border-bottom-right-radius: 0;
 }
-.chzn-container-active .chzn-single-with-drop div {
+.chzntree-container-active .chzntree-single-with-drop div {
   background: transparent;
   border-left: none;
 }
-.chzn-container-active .chzn-single-with-drop div b {
+.chzntree-container-active .chzntree-single-with-drop div b {
   background-position: -18px 1px;
 }
-.chzn-container-active .chzn-choices {
+.chzntree-container-active .chzntree-choices {
   -webkit-box-shadow: 0 0 5px rgba(0,0,0,.3);
   -moz-box-shadow   : 0 0 5px rgba(0,0,0,.3);
   -o-box-shadow     : 0 0 5px rgba(0,0,0,.3);
   box-shadow        : 0 0 5px rgba(0,0,0,.3);
   border: 1px solid #5897fb;
 }
-.chzn-container-active .chzn-choices .search-field input {
+.chzntree-container-active .chzntree-choices .search-field input {
   color: #111 !important;
 }
 /* @end */
 
 /* @group Disabled Support */
-.chzn-disabled {
+.chzntree-disabled {
   cursor: default;
   opacity:0.5 !important;
 }
-.chzn-disabled .chzn-single {
+.chzntree-disabled .chzntree-single {
   cursor: default;
 }
-.chzn-disabled .chzn-choices .search-choice .search-choice-close {
+.chzntree-disabled .chzntree-choices .search-choice .search-choice-close {
   cursor: default;
 }
 
 /* @group Right to Left */
-.chzn-rtl { direction:rtl;text-align: right; }
-.chzn-rtl .chzn-single { padding-left: 0; padding-right: 8px; }
-.chzn-rtl .chzn-single span { margin-left: 26px; margin-right: 0; }
-.chzn-rtl .chzn-single div {
+.chzntree-rtl { direction:rtl;text-align: right; }
+.chzntree-rtl .chzntree-single { padding-left: 0; padding-right: 8px; }
+.chzntree-rtl .chzntree-single span { margin-left: 26px; margin-right: 0; }
+.chzntree-rtl .chzntree-single div {
   left: 0; right: auto;
   border-left: none; border-right: 1px solid #aaaaaa;
   -webkit-border-radius: 4px 0 0 4px;
   -moz-border-radius   : 4px 0 0 4px;
   border-radius        : 4px 0 0 4px;
 }
-.chzn-rtl .chzn-choices li { float: right; }
-.chzn-rtl .chzn-choices .search-choice { padding: 3px 6px 3px 19px; margin: 3px 5px 3px 0; }
-.chzn-rtl .chzn-choices .search-choice .search-choice-close { left: 5px; right: auto; background-position: right top;}
-.chzn-rtl.chzn-container-single .chzn-results { margin-left: 4px; margin-right: 0; padding-left: 0; padding-right: 4px; }
-.chzn-rtl .chzn-results .group-option { padding-left: 0; padding-right: 20px; }
-.chzn-rtl.chzn-container-active .chzn-single-with-drop div { border-right: none; }
-.chzn-rtl .chzn-search input {
+.chzntree-rtl .chzntree-choices li { float: right; }
+.chzntree-rtl .chzntree-choices .search-choice { padding: 3px 6px 3px 19px; margin: 3px 5px 3px 0; }
+.chzntree-rtl .chzntree-choices .search-choice .search-choice-close { left: 5px; right: auto; background-position: right top;}
+.chzntree-rtl.chzntree-container-single .chzntree-results { margin-left: 4px; margin-right: 0; padding-left: 0; padding-right: 4px; }
+.chzntree-rtl .chzntree-results .group-option { padding-left: 0; padding-right: 20px; }
+.chzntree-rtl.chzntree-container-active .chzntree-single-with-drop div { border-right: none; }
+.chzntree-rtl .chzntree-search input {
   background: url('sites/all/themes/allplayers960/images/chosen-sprite.png') no-repeat -38px -22px, #ffffff;
   background: url('sites/all/themes/allplayers960/images/chosen-sprite.png') no-repeat -38px -22px, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, white), color-stop(0.99, #eeeeee));
   background: url('sites/all/themes/allplayers960/images/chosen-sprite.png') no-repeat -38px -22px, -webkit-linear-gradient(center bottom, white 85%, #eeeeee 99%);
@@ -366,21 +366,21 @@
 }
 /* @end */
 
-.chosentree-selector {
+.chzntree-container {
   width: 100%;
 }
 
-.chosentree-selector.chzn-container-single .chzn-search {
+.chzntree-container-single .chzntree-search {
   padding: 0;
 }
 
-.chosentree-selector.chzn-container-single .chzn-search input {
+.chzntree-container-single .chzntree-search input {
   width: 100%;
   box-sizing: border-box;
   -webkit-box-sizing:border-box;
   -moz-box-sizing: border-box;
 }
 
-.chosentree-selector.chzn-container-single .chzn-search input.searching {
+.chzntree-container-single .chzntree-search input.searching {
   background:url(images/throbber.gif) no-repeat 99% 6px !important;
 }

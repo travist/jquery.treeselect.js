@@ -50,16 +50,16 @@
 
       // Create the selector element.
       selector = $(document.createElement('div'));
-      selector.addClass('chosentree-selector chzn-container');
+      selector.addClass('chosentree-selector chzntree-container');
       if (params.input_type == 'search') {
-        selector.addClass('chzn-container-single');
+        selector.addClass('chzntree-container-single');
         search = $(document.createElement('div'));
-        search.addClass('chzn-search');
+        search.addClass('chzntree-search');
       }
       else {
-        selector.addClass('chzn-container-multi');
+        selector.addClass('chzntree-container-multi');
         choices = $(document.createElement('ul'));
-        choices.addClass('chzn-choices chosentree-choices');
+        choices.addClass('chzntree-choices chosentree-choices');
         search = $(document.createElement('li'));
         search.addClass('search-field');
       }
