@@ -508,17 +508,37 @@
      * @param {function} callback Called with the results of this search.
      */
     TreeNode.prototype.search = function(text, callback) {
-      var results = {};
-      text = text.toLowerCase();
-      this.loadAll(function(node) {
+      // If no text was provided, then just return the root children.
+      if (!text) {
         if (callback) {
-          callback(results);
+          callback(this.children);
         }
-      }, function(node) {
-        if (node.title.toLowerCase().search(text) !== -1) {
-          results[node.id] = node;
-        }
-      }, true);
+      }
+      else {
+
+        // Initialize our results.
+        var results = {};
+
+        // Convert the text to lowercase.
+        text = text.toLowerCase();
+
+        // Load all nodes.
+        this.loadAll(function(node) {
+
+          // Callback with the results of this search.
+          if (callback) {
+            callback(results);
+          }
+        }, function(node) {
+
+          // If we are not the root node, and the text matches the title.
+          if (!node.root && node.title.toLowerCase().search(text) !== -1) {
+
+            // Add this to our search results.
+            results[node.id] = node;
+          }
+        }, true);
+      }
     };
 
     // Iterate through each instance.

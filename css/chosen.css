@@ -369,3 +369,7 @@
 .chosentree-selector.chzn-container-single .chzn-search {
   padding: 0;
 }
+
+.chosentree-selector.chzn-container-single .chzn-search input.searching {
+  background:url(images/throbber.gif) no-repeat 99% 6px !important;
+}

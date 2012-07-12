@@ -29,7 +29,6 @@
       var selector = null;
       var choices = null;
       var search = null;
-      var search_results = null;
       var input = null;
       var label = null;
       var loading = null;
@@ -37,6 +36,7 @@
       var treeselect = null;
       var treewrapper = null;
       var selectedTimer = 0;
+      var root = null;
 
       // Show or hide the tree.
       var showTree = function(show, tween) {
@@ -64,11 +64,6 @@
         search = $(document.createElement('li'));
         search.addClass('search-field');
       }
-
-      // Create the search results.
-      search_results = $(document.createElement('div'));
-      search_results.addClass('chosentree-search-results');
-      search_results.hide();
 
       // If they wish to have a label.
       label = $(document.createElement('label'));
@@ -104,20 +99,43 @@
           // Need to make room for the search symbol.
           input.width(params.width - 19);
           input.addClass('chosentree-search');
-          input.bind('input', function() {
-            var value = $(this).val();
-            if (value) {
-              // Search the treenode.
-              var node = treeselect.eq(0)[0].treenode;
-              if (node) {
-                node.search(value, function(nodes) {
-                  console.log(nodes);
+
+          // Keep track of a search timeout.
+          var searchTimeout = 0;
+
+          // Bind to the input when they type.
+          input.bind('input', function inputSearch() {
+
+            // We want to make sure we don't try while it is searching...
+            if (!input.hasClass('searching')) {
+
+              // Continue if we have a root node.
+              if (root) {
+                // Get the input value.
+                var value = $(this).val();
+
+                // Say that we are now searching...
+                input.addClass('searching');
+
+                // Search the tree node.
+                root.search(value, function(nodes) {
+
+                  // Say we are no longer searching...
+                  input.removeClass('searching');
+
+                  // Iterate over the nodes and append them to the search.
+                  root.childlist.children().detach();
+                  for (var i in nodes) {
+                    root.childlist.append(nodes[i].display);
+                  }
                 });
               }
-              //search_results.slidedown();
             }
             else {
-              //search_results.slideup();
+
+              // Check again in 1 second.
+              clearTimeout(searchTimeout);
+              searchTimeout = setTimeout(inputSearch, 1000);
             }
           });
         }
@@ -161,7 +179,6 @@
       });
 
       // Add the treeselect widget.
-      treewrapper.append(search_results);
       treewrapper.append(treeselect.append(loading));
       $(this).append(selector.append(treewrapper));
 
@@ -173,7 +190,7 @@
 
       // Reset the selected callback.
       treeparams.selected = (function(chosentree) {
-        return function(node, root) {
+        return function(node, isRoot) {
 
           // Get the existing choices.
           var selected_choice = $('li#choice_' + node.id, choices);
@@ -196,7 +213,7 @@
               span.text(node.title);
 
               // Don't allow them to remove the root element.
-              if (!root) {
+              if (!isRoot) {
                 var close = $(document.createElement('a'));
                 close.addClass('search-choice-close');
                 close.attr('href', 'javascript:void(0)');
@@ -226,7 +243,7 @@
           }
 
           // Make sure we don't do this often for performance.
-          if (root) {
+          if (isRoot) {
 
             // Get all of the nodes that are selected.
             var nodes = [];
@@ -277,6 +294,7 @@
 
       // Now declare our treeselect control.
       treeselect.treeselect(treeparams);
+      root = treeselect.eq(0)[0].treenode;
 
       // Don't show the choices.
       if (choices && !treeparams.collapsed) {
