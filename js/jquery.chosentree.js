@@ -10,7 +10,6 @@
     // Setup the default parameters.
     params = $.extend({
       inputId: 'chosentree-select',     /** The input element ID and NAME. */
-      width: 450,                       /** The width of this widget. */
       label: '',                        /** The label to add to the input. */
       description: '',                  /** The description for the input. */
       input_placeholder: 'Select Item', /** The input placeholder text. */
@@ -97,7 +96,6 @@
         if (params.input_type == 'search') {
 
           // Need to make room for the search symbol.
-          input.width(params.width - 19);
           input.addClass('chosentree-search');
 
           // Keep track of a search timeout.
@@ -141,8 +139,7 @@
         }
         else {
 
-          // Set the width and add the results class.
-          input.width(params.width);
+          // Add the results class.
           input.addClass('chosentree-results');
         }
 
@@ -159,7 +156,6 @@
 
       treewrapper = $(document.createElement('div'));
       treewrapper.addClass('treewrapper');
-      treewrapper.css('width', params.width + 'px');
       treewrapper.hide();
 
       // Create a loading span.

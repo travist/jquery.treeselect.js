@@ -366,8 +366,19 @@
 }
 /* @end */
 
+.chosentree-selector {
+  width: 100%;
+}
+
 .chosentree-selector.chzn-container-single .chzn-search {
   padding: 0;
+}
+
+.chosentree-selector.chzn-container-single .chzn-search input {
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-box-sizing:border-box;
+  -moz-box-sizing: border-box;
 }
 
 .chosentree-selector.chzn-container-single .chzn-search input.searching {
