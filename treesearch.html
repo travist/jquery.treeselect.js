@@ -1,0 +1,46 @@
+<script type='text/javascript'>
+  jQuery(function() {
+    $('div.chosensearch').chosentree({
+      width: 500,
+      deepLoad: true,
+      inputName: '',
+      input_placeholder: 'Search Groups',
+      input_type: 'search',
+      showtree: true,
+      load: function(node, callback) {
+        console.log(node);
+        /**
+          * This would typically be replaced with an jQuery.ajax where
+          * you would return the tree structure for the provided node.
+          */
+        setTimeout(function() {
+          callback(loadChildren(node, 0));
+        }, 1000);
+      }
+    });
+  });
+</script>
+<div class="chosensearch"></div>
+<h2>Usage</h2>
+<pre><code>
+&lt;script type='text/javascript'&gt;
+  jQuery(function() {
+    $('div.chosensearch').chosentree({
+      width: 500,
+      deepLoad: true,
+      inputName: '',
+      input_placeholder: 'Search Groups',
+      input_type: 'search',
+      showtree: true,
+      load: function(node, callback) {
+        /**
+         * This would typically call jQuery.ajax to load a new node
+         * on your server where you would return the tree structure
+         * for the provided node.
+         */
+      }
+    });
+  });
+&lt;/script&gt;
+&lt;div class="chosensearch"&gt;&lt;/div&gt;
+</code></pre>

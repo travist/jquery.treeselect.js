@@ -5,7 +5,9 @@
     <meta charset='utf-8' />
     <meta http-equiv="X-UA-Compatible" content="chrome=1" />
     <meta name="description" content="jquery.treeselect.js : A minimalistic jQuery hierarchy select widget used for selecting hierarchy structures in a treeview format." />
-    <script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css">
     <script type='text/javascript' src='lib/jquery.moreorless.js/jquery.moreorless.js'></script>
     <script type='text/javascript' src='js/jquery.treeselect.js?random=12324234'></script>
     <script type='text/javascript' src='js/jquery.chosentree.js'></script>
@@ -14,43 +16,24 @@
     <link rel='stylesheet' type='text/css' href='css/treeselect.css' />
     <link rel='stylesheet' type='text/css' href='css/chosen.css' />
     <script type='text/javascript'>
-      jQuery(function() {
-        var maxDepth = 8;
-        function loadChildren(node, level) {
-          var hasChildren = node.level < maxDepth;
-          for (var i=0; i<2; i++) {
-            var id = node.id + (i+1).toString();
-            node.children.push({
-              id:id,
-              title:'Node ' + id,
-              has_children:hasChildren,
-              level: node.level + 1,
-              children:[]
-            });
-            if (hasChildren && level < 2) {
-              loadChildren(node.children[i], (level+1));
-            }
+      var maxDepth = 8;
+      var loadChildren = function(node, level) {
+        var hasChildren = node.level < maxDepth;
+        for (var i=0; i<2; i++) {
+          var id = node.id + (i+1).toString();
+          node.children.push({
+            id:id,
+            title:'Node ' + id,
+            has_children:hasChildren,
+            level: node.level + 1,
+            children:[]
+          });
+          if (hasChildren && level < 2) {
+            loadChildren(node.children[i], (level+1));
           }
-          return node;
-        };
-
-        $('div.chosentree').chosentree({
-          width: 500,
-          deepLoad: false,
-          load: function(node, callback) {
-            console.log(node);
-            /**
-             * This would typically be replaced with an jQuery.ajax where
-             * you would return the tree structure for the provided node.
-             */
-            setTimeout(function() {
-              callback(loadChildren(node, 0));
-            }, 1000);
-          }
-        });
-      });
-
-
+        }
+        return node;
+      };
     </script>
     <title>jquery.treeselect.js</title>
   </head>
@@ -78,42 +61,22 @@
         <h1>jQuery TreeSelect widget</h1>
 
 <p>This widget is used for transforming a hierarchy HTML lists with
-input's into a hierarchial tree select tool.  You can also call this widget
+input's into a hierarchy tree select tool.  You can also call this widget
 with a structured JSON list and it will convert it to an HTML hierarchy select
-tool of those items.</p>
-<h2>Example</h2>
-<div class="chosentree"></div>
-<h2>Usage</h2>
-<pre><code>&lt;html&gt;
-  &lt;head&gt;
-    &lt;script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"&gt;&lt;/script&gt;
-    &lt;script type='text/javascript' src='lib/jquery.moreorless.js/jquery.moreorless.js'&gt;&lt;/script&gt;
-    &lt;script type='text/javascript' src='js/jquery.treeselect.js'&gt;&lt;/script&gt;
-    &lt;script type='text/javascript' src='js/jquery.chosentree.js'&gt;&lt;/script&gt;
-    &lt;link rel='stylesheet' type='text/css' href='lib/jquery.moreorless.js/moreorless.css' /&gt;
-    &lt;link rel='stylesheet' type='text/css' href='css/treeselect.css' /&gt;
-    &lt;link rel='stylesheet' type='text/css' href='css/chosen.css' /&gt;
-    &lt;script type='text/javascript'&gt;
-    jQuery(function() {
-      $('div.chosentree').chosentree({
-        width: 500,
-        deepLoad: false,
-        load: function(node, callback) {
-          /**
-           * This would typically call jQuery.ajax to load a new node
-           * on your server where you would return the tree structure
-           * for the provided node.
-           */
-        }
-      });
-    });
-  &lt;/script&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    &lt;div class="chosentree"&gt;&lt;/div&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
+tool of those items.  In addition, you can also use this widget as an intuitive
+tree search tool using the input_type='search' parameter.</p>
+<h2>Examples</h2>
+<script type="text/javascript">
+  $(function() {
+    $('#examples').tabs();
+  });
+</script>
+<div id="examples">
+  <ul>
+    <li><a href="treeselect.html"><span>Tree Select</span></a></li>
+    <li><a href="treesearch.html"><span>Tree Search</span></a></li>
+  </ul>
+</div>
       </section>
     </div>
 
