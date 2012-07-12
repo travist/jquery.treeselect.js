@@ -50,7 +50,7 @@
 
       // Create the selector element.
       selector = $(document.createElement('div'));
-      selector.addClass('chosentree-selector chzntree-container');
+      selector.addClass('chzntree-container');
       if (params.input_type == 'search') {
         selector.addClass('chzntree-container-single');
         search = $(document.createElement('div'));
