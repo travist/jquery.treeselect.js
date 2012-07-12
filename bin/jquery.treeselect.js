@@ -616,6 +616,7 @@
       description: '',                  /** The description for the input. */
       input_placeholder: 'Select Item', /** The input placeholder text. */
       input_type: 'text',               /** Define the input type. */
+      no_results_text: 'No results found', /** Shown when no results. */
       min_height: 100,                  /** The miniumum height. */
       more_text: '+%num% more',         /** The text to show in the more. */
       loaded: null,                     /** Called when all items are loaded. */
@@ -738,9 +739,16 @@
                     else {
 
                       // Iterate over the nodes and append them to the search.
+                      var count = 0;
                       root.childlist.children().detach();
                       for (var i in nodes) {
+                        count++;
                         root.childlist.append(nodes[i].display);
+                      }
+
+                      if (!count) {
+                        var txt = '<li>' + params.no_results_text + '</li>';
+                        root.childlist.append(txt);
                       }
                     }
                   };
