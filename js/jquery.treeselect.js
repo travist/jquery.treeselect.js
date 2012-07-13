@@ -460,6 +460,10 @@
         params.onbuild(this);
       }
 
+      // Create a search item.
+      this.searchItem = this.display.clone(true, true);
+      $('.treeselect-expand', this.searchItem).remove();
+
       // Return the display.
       return this.display;
     };
@@ -511,7 +515,7 @@
       // If no text was provided, then just return the root children.
       if (!text) {
         if (callback) {
-          callback(this.children);
+          callback(this.children, false);
         }
       }
       else {
@@ -527,7 +531,7 @@
 
           // Callback with the results of this search.
           if (callback) {
-            callback(results);
+            callback(results, true);
           }
         }, function(node) {
 

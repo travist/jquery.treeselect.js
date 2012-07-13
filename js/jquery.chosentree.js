@@ -123,7 +123,7 @@
 
                 // Search the tree node.
                 root.search(inputValue, (function(oldValue) {
-                  return function(nodes) {
+                  return function(nodes, searchResults) {
 
                     // Say we are no longer searching...
                     input.removeClass('searching');
@@ -139,9 +139,26 @@
                       // Iterate over the nodes and append them to the search.
                       var count = 0;
                       root.childlist.children().detach();
+
+                      // Add a class to distinguish if this is search results.
+                      if (searchResults) {
+                        root.childlist.addClass('chzntree-search-results');
+                      }
+                      else {
+                        root.childlist.removeClass('chzntree-search-results');
+                      }
+
+                      // Iterate through our nodes.
                       for (var i in nodes) {
                         count++;
-                        root.childlist.append(nodes[i].display);
+
+                        // Use either the search item or the display.
+                        if (searchResults) {
+                          root.childlist.append(nodes[i].searchItem);
+                        }
+                        else {
+                          root.childlist.append(nodes[i].display);
+                        }
                       }
 
                       if (!count) {
