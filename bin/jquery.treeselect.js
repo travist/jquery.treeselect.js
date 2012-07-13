@@ -12,6 +12,7 @@
       load: null,                 /** Callback to load new tree's */
       deepLoad: false,            /** Performs a deep load */
       onbuild: null,              /** Called when each node is building. */
+      postbuild: null,            /** Called when the node is done building. */
       inputName: 'treeselect',    /** The input name. */
       selectAll: false,           /** If we wish to see a select all. */
       selectAllText: 'Select All' /** The select all text. */
@@ -36,6 +37,7 @@
         allLoaded: false,     /** Flag to see if we have loaded all nodes. */
         value: 0,             /** The input value for this node. */
         title: '',            /** The title of this node. */
+        url: '',              /** The URL to this node. */
         has_children: true,   /** Boolean if this node has children. */
         children: [],         /** Array of children. */
         data: {},             /** Additional data to attach to the node. */
@@ -363,10 +365,23 @@
 
       // If there is a title, then build it.
       if (!this.root && this.title) {
-        this.link = this.build_link($(document.createElement('a')).attr({
-          'class': 'treeselect-title'
-        }));
-        this.link.css('marginLeft', left + 'px').text(this.title);
+
+        // Create a node link.
+        this.nodeLink = $(document.createElement('a')).attr({
+          'class': 'treeselect-title',
+          'href': this.url,
+          'target': '_blank'
+        }).css('marginLeft', left + 'px').text(this.title);
+
+        // If this node has children, then it should be a link.
+        if (this.has_children) {
+          this.link = this.build_link(this.nodeLink.clone());
+        }
+        else {
+          this.link = $(document.createElement('div')).attr({
+            'class': 'treeselect-title'
+          }).css('marginLeft', left + 'px').text(this.title);
+        }
       }
 
       // Return the link.
@@ -461,8 +476,19 @@
       }
 
       // Create a search item.
-      this.searchItem = this.display.clone(true, true);
+      this.searchItem = this.display.clone();
       $('.treeselect-expand', this.searchItem).remove();
+
+      // If the search title is not a link, then make it one...
+      var searchTitle = $('div.treeselect-title', this.searchItem);
+      if (searchTitle.length > 0) {
+        searchTitle.replaceWith(this.nodeLink);
+      }
+
+      // See if they wish to hook into the postbuild process.
+      if (params.postbuild) {
+        params.postbuild(this);
+      }
 
       // Return the display.
       return this.display;

@@ -384,3 +384,7 @@
 .chzntree-container-single .chzntree-search input.searching {
   background:url(images/throbber.gif) no-repeat 99% 6px !important;
 }
+
+.chzntree-search-results .treeselect-title{
+  margin-left: 5px !important;
+}
