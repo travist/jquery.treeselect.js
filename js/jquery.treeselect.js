@@ -598,7 +598,9 @@
 
         // If they provided select all text, add it here.
         if (selectAll) {
-          var span = $(document.createElement('span')).html(selectAll);
+          var span = $(document.createElement('span')).attr({
+            'class': 'treeselect-select-all'
+          }).html(selectAll);
           root.display.append(span);
         }
       }
