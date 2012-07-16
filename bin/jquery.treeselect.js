@@ -98,27 +98,32 @@
         }
 
         // Call the load function.
-        params.load(this, function(node) {
+        params.load(this, (function(treenode) {
+          return function(node) {
 
-          // Say this node is loaded.
-          node.nodeloaded = true;
+            // Merge the result with this node.
+            treenode = jQuery.extend(treenode, node);
 
-          // Add to the loaded nodes array.
-          loadedNodes[node.id] = node.id;
+            // Say this node is loaded.
+            treenode.nodeloaded = true;
 
-          // Build the node.
-          node.build();
+            // Add to the loaded nodes array.
+            loadedNodes[treenode.id] = treenode.id;
 
-          // Callback that we are loaded.
-          if (callback) {
-            callback(node);
-          }
+            // Build the node.
+            treenode.build();
 
-          // Say we are not busy.
-          if (!hideBusy) {
-            node.setBusy(false);
-          }
-        });
+            // Callback that we are loaded.
+            if (callback) {
+              callback(treenode);
+            }
+
+            // Say we are not busy.
+            if (!hideBusy) {
+              treenode.setBusy(false);
+            }
+          };
+        })(this));
       }
       else if (callback) {
 
