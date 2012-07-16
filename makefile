@@ -22,7 +22,13 @@ js: ${files}
 	@echo "Generating aggregated bin/jquery.treeselect.js file"
 	@cat > bin/jquery.treeselect.js $^
 	@echo "Generating compressed bin/jquery.treeselect.compressed.js file"
-	@java -jar tools/compiler.jar --js bin/jquery.treeselect.js --js_output_file bin/jquery.treeselect.compressed.js
+	curl -s \
+	  -d compilation_level=SIMPLE_OPTIMIZATIONS \
+	  -d output_format=text \
+	  -d output_info=compiled_code \
+	  --data-urlencode "js_code@bin/jquery.treeselect.js" \
+	  http://closure-compiler.appspot.com/compile \
+	  > bin/jquery.treeselect.compressed.js
 
 # Fix the js style on all the files.
 fixjsstyle: ${files}
@@ -31,8 +37,4 @@ fixjsstyle: ${files}
 # Install the necessary tools.
 tools:
 	apt-get install python-setuptools
-	apt-get install unzip
-	wget http://closure-compiler.googlecode.com/files/compiler-latest.zip -P tools
-	unzip tools/compiler-latest.zip -d tools
-	rm tools/compiler-latest.zip tools/COPYING tools/README
 	easy_install http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz
