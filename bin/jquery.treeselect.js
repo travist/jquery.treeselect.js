@@ -138,7 +138,8 @@
      * @param {function} callback Called when the tree has loaded.
      * @param {function} operation Allow someone to perform an operation.
      */
-    TreeNode.prototype.loadAll = function(callback, operation, hideBusy) {
+    TreeNode.prototype.loadAll = function(callback, operation, hideBusy, ids) {
+      ids = ids || {};
 
       // Make sure we are loaded first.
       this.loadNode(function(node) {
@@ -152,12 +153,15 @@
         var i = node.children.length, count = i;
 
         // If no children, then just call the callback immediately.
-        if (!i) {
+        if (!i || ids.hasOwnProperty(node.id)) {
           if (callback) {
             callback(node);
           }
           return;
         }
+
+        // Add this to the ids to protect against recursion.
+        ids[node.id] = node.id;
 
         // Make this node busy.
         if (!hideBusy) {
@@ -186,7 +190,7 @@
                 node.setBusy(false);
               }
             }
-          }, operation, hideBusy);
+          }, operation, hideBusy, ids);
         }
       });
     };
