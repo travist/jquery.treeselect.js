@@ -254,8 +254,11 @@
 
     /**
      * Selects a node.
+     *
+     * @param {boolean} state The state of the selection.
+     * @param {boolean} indirect TRUE - indirect selection, FALSE - direct.
      */
-    TreeNode.prototype.select = function(state, child) {
+    TreeNode.prototype.select = function(state, indirect) {
 
       // Set the checked state.
       this.checked = state;
@@ -272,7 +275,7 @@
           // Now select the children.
           node.selectChildren(state);
           if (params.selected) {
-            params.selected(node, !child);
+            params.selected(node, !indirect);
           }
         });
       }
@@ -281,7 +284,7 @@
         // Now select the children.
         this.selectChildren(state);
         if (params.selected) {
-          params.selected(this, !child);
+          params.selected(this, !indirect);
         }
       }
     }

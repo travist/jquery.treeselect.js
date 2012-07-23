@@ -254,8 +254,11 @@
 
     /**
      * Selects a node.
+     *
+     * @param {boolean} state The state of the selection.
+     * @param {boolean} indirect TRUE - indirect selection, FALSE - direct.
      */
-    TreeNode.prototype.select = function(state, child) {
+    TreeNode.prototype.select = function(state, indirect) {
 
       // Set the checked state.
       this.checked = state;
@@ -272,7 +275,7 @@
           // Now select the children.
           node.selectChildren(state);
           if (params.selected) {
-            params.selected(node, !child);
+            params.selected(node, !indirect);
           }
         });
       }
@@ -281,7 +284,7 @@
         // Now select the children.
         this.selectChildren(state);
         if (params.selected) {
-          params.selected(this, !child);
+          params.selected(this, !indirect);
         }
       }
     }
@@ -870,7 +873,7 @@
 
       // Reset the selected callback.
       treeparams.selected = (function(chosentree) {
-        return function(node, isRoot) {
+        return function(node, direct) {
 
           // Get the existing choices.
           var selected_choice = $('li#choice_' + node.id, choices);
@@ -893,7 +896,7 @@
               span.text(node.title);
 
               // Don't allow them to remove the root element.
-              if (!isRoot) {
+              if (!node.root) {
                 var close = $(document.createElement('a'));
                 close.addClass('search-choice-close');
                 close.attr('href', 'javascript:void(0)');
@@ -923,7 +926,7 @@
           }
 
           // Make sure we don't do this often for performance.
-          if (isRoot) {
+          if (direct) {
 
             // Get all of the nodes that are selected.
             var nodes = [];
@@ -975,11 +978,6 @@
       // Now declare our treeselect control.
       treeselect.treeselect(treeparams);
       root = treeselect.eq(0)[0].treenode;
-
-      // Don't show the choices.
-      if (choices && !treeparams.collapsed) {
-        choices.hide();
-      }
 
       // Show the tree by default.
       if (treeparams.showtree || !treeparams.collapsed) {
