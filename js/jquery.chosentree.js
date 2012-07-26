@@ -41,7 +41,7 @@
       // Show or hide the tree.
       var showTree = function(show, tween) {
         tween = tween || 'fast';
-        if (show) {
+        if (show && (root == null || root.has_children)) {
           treewrapper.addClass('treevisible').show('fast');
         }
         else {
@@ -249,8 +249,9 @@
               var span = $(document.createElement('span'));
               span.text(node.title);
 
-              // Don't allow them to remove the root element.
-              if (!node.root) {
+              // Don't allow them to remove the root element unless it is
+              // visible and has children.
+              if (!node.root || (node.showRoot && node.has_children)) {
                 var close = $(document.createElement('a'));
                 close.addClass('search-choice-close');
                 close.attr('href', 'javascript:void(0)');

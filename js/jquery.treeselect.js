@@ -14,6 +14,7 @@
       onbuild: null,              /** Called when each node is building. */
       postbuild: null,            /** Called when the node is done building. */
       inputName: 'treeselect',    /** The input name. */
+      showRoot: false,            /** Show the root item with a checkbox. */
       selectAll: false,           /** If we wish to see a select all. */
       selectAllText: 'Select All' /** The select all text. */
     }, params);
@@ -205,7 +206,7 @@
         this.span.removeClass('collapsed').addClass('expanded');
         this.childlist.show('fast');
       }
-      // We don't wan't to collapse if they can't open it back up.
+      // Only collapse if they can open it back up.
       else if (this.span.length > 0) {
         this.link.removeClass('expanded').addClass('collapsed');
         this.span.removeClass('expanded').addClass('collapsed');
@@ -290,13 +291,14 @@
     }
 
     /**
-     * Build the list element.
+     * Build the treenode element.
      */
-    TreeNode.prototype.build_list = function() {
-      var list = $();
-      list = $(document.createElement('li'));
-      list.addClass(this.odd ? 'odd' : 'even');
-      return list;
+    TreeNode.prototype.build_treenode = function() {
+      var treenode = $();
+      treenode = $(document.createElement(this.root ? 'div' : 'li'));
+      treenode.addClass('treenode');
+      treenode.addClass(this.odd ? 'odd' : 'even');
+      return treenode;
     };
 
     /**
@@ -335,8 +337,9 @@
           };
         })(this));
 
-        // If this is a root item, then just hide the input.
-        if (this.root) {
+        // If this is a root item and we are not showing the root item, then
+        // just hide the input.
+        if (this.root && !params.showRoot) {
           this.input.hide();
         }
       }
@@ -360,8 +363,9 @@
      */
     TreeNode.prototype.build_span = function(left) {
 
-      // If we are not root, and we have children, show a +/- symbol.
-      if (!this.root && this.has_children) {
+      // If we are showing the root item or we are not root, and we have
+      // children, show a +/- symbol.
+      if ((!this.root || this.showRoot) && this.has_children) {
         this.span = this.build_link($(document.createElement('span')).attr({
           'class': 'treeselect-expand'
         }));
@@ -376,7 +380,7 @@
     TreeNode.prototype.build_title = function(left) {
 
       // If there is a title, then build it.
-      if (!this.root && this.title) {
+      if ((!this.root || this.showRoot) && this.title) {
 
         // Create a node link.
         this.nodeLink = $(document.createElement('a')).attr({
@@ -453,7 +457,12 @@
 
       // Create the list display.
       if (this.display.length == 0) {
-        this.display = this.build_list();
+        this.display = this.build_treenode();
+      }
+      else {
+        var treenode = this.build_treenode();
+        this.display.append(treenode);
+        this.display = treenode;
       }
 
       // Now append the input.
@@ -594,7 +603,7 @@
 
       // Add a select all link.
       var selectAll = root.getSelectAll();
-      if (selectAll !== false) {
+      if (selectAll !== false && !root.showRoot) {
 
         // Create an input that will select all children if selected.
         root.display.append($(document.createElement('input')).attr({
@@ -641,6 +650,11 @@
           }
         });
       });
+
+      // If the root element doesn't have children, then hide the treeselect.
+      if (!root.has_children) {
+        this.parentElement.style.display = 'none';
+      }
     });
   };
 })(jQuery);

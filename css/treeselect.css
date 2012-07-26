@@ -25,7 +25,7 @@
   color:#999;
 }
 
-.treeselect, .treeselect ul, .treeselect li {
+.treeselect, .treeselect ul, .treeselect .treenode {
   margin:0;
   padding:0;
   list-style:none;
@@ -35,7 +35,7 @@
   display:none;
 }
 
-.treeselect li {
+.treeselect .treenode {
   line-height:200%;
   border-top: 1px solid #fff;
   border-left: 1px solid #fff;
@@ -44,7 +44,7 @@
   width:100%;
 }
 
-.treeselect li ul {
+.treeselect .treenode ul {
   margin: 0 15px 0 15px;
 }
 
@@ -55,7 +55,7 @@
   background:#f3f3f3;
 }
 
-.treeselect li input {
+.treeselect .treenode input {
   float:left;
   position:absolute;
   top:3px;width:13px;
@@ -64,7 +64,7 @@
   font-size:0;
 }
 
-.treeselect li span.treeselect-expand {
+.treeselect .treenode span.treeselect-expand {
   float:left;
   position:absolute;
   top:2px;
@@ -79,11 +79,11 @@
   margin-left: 5px;
 }
 
-.treeselect li span.treeselect-expand, .treeselect li span.treeselect-expand.collapsed {
+.treeselect .treenode span.treeselect-expand, .treeselect .treenode span.treeselect-expand.collapsed {
   background:url(images/collapsed.gif) no-repeat 0 0;
 }
 
-.treeselect li span.treeselect-expand.expanded {
+.treeselect .treenode span.treeselect-expand.expanded {
   background:url(images/expanded.gif) no-repeat 0 0;
 }
 
