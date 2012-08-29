@@ -459,7 +459,7 @@
       if (this.display.length == 0) {
         this.display = this.build_treenode();
       }
-      else {
+      else if (this.root) {
         var treenode = this.build_treenode();
         this.display.append(treenode);
         this.display = treenode;
