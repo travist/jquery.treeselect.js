@@ -50,7 +50,8 @@
         input: $(),           /** The input display. */
         link: $(),            /** The link display. */
         span: $(),            /** The span display. */
-        childlist: $()        /** The childlist display. */
+        childlist: $(),       /** The childlist display. */
+        exclude: {}           /** An array of nodes to exclude for selection. */
       }, nodeparams);
 
       // Say that we are a TreeNode.
@@ -309,39 +310,51 @@
       // Only add an input if the input name is defined.
       if (params.inputName) {
 
-        // Create the input element.
-        this.input = $(document.createElement('input'));
-
-        // Get the value for this input item.
-        var value = this.value || this.id;
-
-        // Create the attributes for this input item.
-        this.input.attr({
-          'type': 'checkbox',
-          'value': value,
-          'name': params.inputName + '-' + value,
-          'checked': this.checked
-        });
-        this.input.css('left', left + 'px');
-        this.input.bind('click', (function(node) {
-          return function(event) {
-
-            // Determine if the input is checked.
-            var checked = $(event.target).is(':checked');
-
-            // Expand if checked.
-            node.expand(checked);
-
-            // Call the select method.
-            node.select(checked);
-          };
-        })(this));
-
-        // If this is a root item and we are not showing the root item, then
-        // just hide the input.
-        if (this.root && !params.showRoot) {
-          this.input.hide();
+        // If this node is excluded, then add a dummy div tag.
+        if ((typeof this.exclude[this.id] !== 'undefined')) {
+          this.input = $(document.createElement('div'));
+          this.input.addClass('treenode-no-select');
         }
+        else {
+
+          // Create the input element.
+          this.input = $(document.createElement('input'));
+
+          // Get the value for this input item.
+          var value = this.value || this.id;
+
+          // Create the attributes for this input item.
+          this.input.attr({
+            'type': 'checkbox',
+            'value': value,
+            'name': params.inputName + '-' + value,
+            'checked': this.checked
+          }).addClass('treenode-input');
+
+          // Bind to the click on the input.
+          this.input.bind('click', (function(node) {
+            return function(event) {
+
+              // Determine if the input is checked.
+              var checked = $(event.target).is(':checked');
+
+              // Expand if checked.
+              node.expand(checked);
+
+              // Call the select method.
+              node.select(checked);
+            };
+          })(this));
+
+          // If this is a root item and we are not showing the root item, then
+          // just hide the input.
+          if (this.root && !params.showRoot) {
+            this.input.hide();
+          }
+        }
+
+        // Set the input left.
+        this.input.css('left', left + 'px');
       }
       return this.input;
     };
@@ -434,7 +447,8 @@
             this.children[i] = new TreeNode($.extend(this.children[i], {
               level: this.level + 1,
               odd: odd,
-              checked: this.checked
+              checked: this.checked,
+              exclude: this.exclude
             }));
 
             // Now append the built children to this list.
@@ -509,6 +523,13 @@
       // See if they wish to hook into the postbuild process.
       if (params.postbuild) {
         params.postbuild(this);
+      }
+
+      // Check if all child nodes are excluded, and hide if so.
+      if (typeof this.exclude[this.id] !== 'undefined') {
+        if ($('.treenode-input', this.display).length == 0) {
+          this.display.hide();
+        }
       }
 
       // Return the display.

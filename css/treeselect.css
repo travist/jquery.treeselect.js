@@ -55,10 +55,11 @@
   background:#f3f3f3;
 }
 
-.treeselect .treenode input {
+.treeselect .treenode input, .treeselect .treenode .treenode-no-select {
   float:left;
   position:absolute;
-  top:3px;width:13px;
+  top:3px;
+  width:13px;
   height:13px;
   cursor:auto;
   font-size:0;
