@@ -88,6 +88,15 @@
   background:url(images/expanded.gif) no-repeat 0 0;
 }
 
+.treeselect .treenode.no-children  span.treeselect-expand, .treeselect .treenode.no-children  span.treeselect-expand.collapsed {
+  background-image:none;
+  cursor: default !important;
+}
+
+.treeselect .treenode.no-children  a.treeselect-title:hover {
+  cursor: default !important;
+}
+
 .treeselect .treebusy {
   background:url(images/throbber.gif) no-repeat 0 0 !important;
   width:16px;
