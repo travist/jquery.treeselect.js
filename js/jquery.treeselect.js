@@ -262,14 +262,21 @@
      */
     TreeNode.prototype.select = function(state, indirect) {
 
-      // Set the checked state.
-      this.checked = state;
+      // Only check this node if it is a selectable input.
+      if (!this.input.hasClass('treenode-no-select')) {
 
-      // Make sure the input is checked accordingly.
-      this.input.attr('checked', state);
+        // Set the checked state.
+        this.checked = state;
 
-      // If they wish to deep load then do that here.
-      if (this.checked && params.deepLoad) {
+        // Make sure the input is checked accordingly.
+        this.input.attr('checked', state);
+
+      }
+
+      // If they wish to deep load then do that here - base the check on the
+      // state passed in rather than the checked state of the input, because
+      // the input may not have been checked if it is not a selectable input.
+      if (state && params.deepLoad) {
 
         // Load all nodes underneath this node.
         this.loadAll(function(node) {
@@ -289,7 +296,7 @@
           params.selected(this, !indirect);
         }
       }
-    }
+    };
 
     /**
      * Build the treenode element.
@@ -369,7 +376,7 @@
         event.data.node.expand($(event.target).hasClass('collapsed'));
       });
       return element;
-    }
+    };
 
     /**
      * Build the span +/- symbol.
@@ -525,10 +532,18 @@
         params.postbuild(this);
       }
 
-      // Check if all child nodes are excluded, and hide if so.
+      // Check if this node is and all child nodes are excluded, and hide if so.
       if (typeof this.exclude[this.id] !== 'undefined') {
         if ($('.treenode-input', this.display).length == 0) {
           this.display.hide();
+        }
+      }
+      else {
+        // This node is not excluded. If no children are beig shown (the oly
+        // input in the tree so far is the one for this node, then add a class
+        // so that we can change the display of the expand icon and title link.
+        if ($('.treenode-input', this.display).length == 1) {
+          this.display.addClass('no-children');
         }
       }
 
