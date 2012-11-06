@@ -539,7 +539,7 @@
         }
       }
       else {
-        // This node is not excluded. If no children are beig shown (the oly
+        // This node is not excluded. If no children are beig shown (the only
         // input in the tree so far is the one for this node, then add a class
         // so that we can change the display of the expand icon and title link.
         if ($('.treenode-input', this.display).length == 1) {
