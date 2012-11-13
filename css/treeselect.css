@@ -68,7 +68,7 @@
 .treeselect .treenode span.treeselect-expand {
   float:left;
   position:absolute;
-  top:2px;
+  top:4px;
   width:13px;
   height:13px;
   cursor:auto;
@@ -88,17 +88,9 @@
   background:url(images/expanded.gif) no-repeat 0 0;
 }
 
-.treeselect .treenode.no-children  span.treeselect-expand, .treeselect .treenode.no-children  span.treeselect-expand.collapsed {
-  background-image:none;
-  cursor: default;
-}
-
-.treeselect .treenode.no-children  a.treeselect-title:hover {
-  cursor: default;
-}
-
-.treeselect .treebusy {
+.treeselect .treenode span.treeselect-expand.treebusy {
   background:url(images/throbber.gif) no-repeat 0 0;
+  top:5px;
   width:16px;
   height:10px;
 }
