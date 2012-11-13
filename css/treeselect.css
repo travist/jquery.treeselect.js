@@ -44,7 +44,7 @@
   width:100%;
 }
 
-.treeselect .treenode ul {
+.treeselect .treenode ul ul {
   margin: 0 15px 0 15px;
 }
 
@@ -90,15 +90,15 @@
 
 .treeselect .treenode.no-children  span.treeselect-expand, .treeselect .treenode.no-children  span.treeselect-expand.collapsed {
   background-image:none;
-  cursor: default !important;
+  cursor: default;
 }
 
 .treeselect .treenode.no-children  a.treeselect-title:hover {
-  cursor: default !important;
+  cursor: default;
 }
 
 .treeselect .treebusy {
-  background:url(images/throbber.gif) no-repeat 0 0 !important;
+  background:url(images/throbber.gif) no-repeat 0 0;
   width:16px;
   height:10px;
 }
