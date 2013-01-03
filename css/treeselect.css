@@ -36,7 +36,7 @@
 }
 
 .treeselect .treenode {
-  line-height:200%;
+  line-height: 24px;
   border-top: 1px solid #fff;
   border-left: 1px solid #fff;
   border-right: 1px solid #fff;
