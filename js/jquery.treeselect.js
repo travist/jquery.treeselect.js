@@ -56,6 +56,12 @@
 
       // Say that we are a TreeNode.
       this.isTreeNode = true;
+
+      // Determine if a node is loading.
+      this.loading = false;
+
+      // The load callback queue.
+      this.loadqueue = [];
     };
 
     /**
@@ -91,6 +97,17 @@
      */
     TreeNode.prototype.loadNode = function(callback, hideBusy) {
 
+      // If we are loading, then just add this callback to the queue and return.
+      if (this.loading) {
+        if (callback) {
+          this.loadqueue.push(callback);
+        }
+        return;
+      }
+
+      // Say we are loading.
+      this.loading = true;
+
       // Only load if we have not loaded yet.
       if (params.load && !this.isLoaded()) {
 
@@ -103,22 +120,34 @@
         params.load(this, (function(treenode) {
           return function(node) {
 
-            // Merge the result with this node.
-            treenode = jQuery.extend(treenode, node);
+            // Only perform the merging and build if it hasn't loaded.
+            if (!treenode.nodeloaded) {
 
-            // Say this node is loaded.
-            treenode.nodeloaded = true;
+              // Merge the result with this node.
+              treenode = jQuery.extend(treenode, node);
 
-            // Add to the loaded nodes array.
-            loadedNodes[treenode.id] = treenode.id;
+              // Say this node is loaded.
+              treenode.nodeloaded = true;
 
-            // Build the node.
-            treenode.build();
+              // Add to the loaded nodes array.
+              loadedNodes[treenode.id] = treenode.id;
+
+              // Build the node.
+              treenode.build();
+            }
 
             // Callback that we are loaded.
             if (callback) {
               callback(treenode);
             }
+
+            // Process the loadqueue.
+            for (var i in treenode.loadqueue) {
+              treenode.loadqueue[i](treenode);
+            }
+
+            // Empty the loadqueue.
+            treenode.loadqueue.length = 0;
 
             // Say we are not busy.
             if (!hideBusy) {
@@ -132,6 +161,9 @@
         // Just callback since we are already loaded.
         callback(this);
       }
+
+      // Say that we are not loading anymore.
+      this.loading = false;
     };
 
     /**
