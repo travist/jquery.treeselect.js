@@ -107,13 +107,12 @@
   z-index: 1010;
 }
 .chzntree-container-single .chzntree-search input[type='text'] {
-  background: #fff url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 100% -22px;
-  background: url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 100% -22px, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, white), color-stop(0.99, #eeeeee));
-  background: url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 100% -22px, -webkit-linear-gradient(center bottom, white 85%, #eeeeee 99%);
-  background: url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 100% -22px, -moz-linear-gradient(center bottom, white 85%, #eeeeee 99%);
-  background: url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 100% -22px, -o-linear-gradient(bottom, white 85%, #eeeeee 99%);
-  background: url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 100% -22px, -ms-linear-gradient(top, #ffffff 85%,#eeeeee 99%);
-  background: url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 100% -22px, linear-gradient(top, #ffffff 85%,#eeeeee 99%);
+  background: -webkit-gradient(linear, left bottom, left top, color-stop(0.85, white), color-stop(0.99, #eeeeee));
+  background: -22px, -webkit-linear-gradient(center bottom, white 85%, #eeeeee 99%);
+  background: -22px, -moz-linear-gradient(center bottom, white 85%, #eeeeee 99%);
+  background: -o-linear-gradient(bottom, white 85%, #eeeeee 99%);
+  background: -ms-linear-gradient(top, #ffffff 85%,#eeeeee 99%);
+  background: linear-gradient(top, #ffffff 85%,#eeeeee 99%);
   margin: 1px 0;
   padding: 4px 20px 4px 5px;
   outline: 0;
