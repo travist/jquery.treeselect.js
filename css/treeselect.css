@@ -88,11 +88,14 @@
   background:url(images/expanded.gif) no-repeat 0 0;
 }
 
-.treeselect .treenode span.treeselect-expand.treebusy {
+.treeselect span.treebusy {
   background:url(images/throbber.gif) no-repeat 0 0;
-  top:5px;
   width:16px;
   height:10px;
+}
+
+.treeselect .treenode span.treeselect-expand.treebusy {
+  top:5px;
 }
 
 .treeselect-title {

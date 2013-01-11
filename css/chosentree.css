@@ -106,7 +106,7 @@
   white-space: nowrap;
   z-index: 1010;
 }
-.chzntree-container-single .chzntree-search input {
+.chzntree-container-single .chzntree-search input[type='text'] {
   background: #fff url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 100% -22px;
   background: url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 100% -22px, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, white), color-stop(0.99, #eeeeee));
   background: url('http://harvesthq.github.com/chosen/chosen/chosen-sprite.png') no-repeat 100% -22px, -webkit-linear-gradient(center bottom, white 85%, #eeeeee 99%);
@@ -119,8 +119,23 @@
   outline: 0;
   border: 1px solid #aaa;
   font-family: sans-serif;
-  font-size: 1em;
+  font-size: 1.2em;
+  line-height: 1.8em;
+  box-sizing: border-box;
+  -webkit-box-sizing:border-box;
+  -moz-box-sizing: border-box;
+  width: 100%;
 }
+
+.chzntree-container-single .chzntree-search.manualsearch input[type='text'] {
+  width: 85%;
+}
+
+.chzntree-container-single .chzntree-search.manualsearch input.chosentree-search-btn {
+  padding: 5px 20px;
+  cursor: pointer;
+}
+
 .chzntree-container-single .chzntree-drop {
   -webkit-border-radius: 0 0 4px 4px;
   -moz-border-radius   : 0 0 4px 4px;
@@ -131,7 +146,7 @@
 }
 /* @end */
 
-.chzntree-container-single-nosearch .chzntree-search input {
+.chzntree-container-single-nosearch .chzntree-search input[type='text'] {
   position: absolute;
   left: -9000px;
 }
@@ -164,7 +179,7 @@
   margin: 0;
   padding: 0;
 }
-.chzntree-container-multi .chzntree-choices .search-field input {
+.chzntree-container-multi .chzntree-choices .search-field input[type='text'] {
   color: #666;
   background: transparent !important;
   border: 0 !important;
@@ -320,7 +335,7 @@
   box-shadow        : 0 0 5px rgba(0,0,0,.3);
   border: 1px solid #5897fb;
 }
-.chzntree-container-active .chzntree-choices .search-field input {
+.chzntree-container-active .chzntree-choices .search-field input[type='text'] {
   color: #111 !important;
 }
 /* @end */
@@ -354,7 +369,7 @@
 .chzntree-rtl.chzntree-container-single .chzntree-results { margin-left: 4px; margin-right: 0; padding-left: 0; padding-right: 4px; }
 .chzntree-rtl .chzntree-results .group-option { padding-left: 0; padding-right: 20px; }
 .chzntree-rtl.chzntree-container-active .chzntree-single-with-drop div { border-right: none; }
-.chzntree-rtl .chzntree-search input {
+.chzntree-rtl .chzntree-search input[type='text'] {
   background: url('sites/all/themes/allplayers960/images/chosen-sprite.png') no-repeat -38px -22px, #ffffff;
   background: url('sites/all/themes/allplayers960/images/chosen-sprite.png') no-repeat -38px -22px, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, white), color-stop(0.99, #eeeeee));
   background: url('sites/all/themes/allplayers960/images/chosen-sprite.png') no-repeat -38px -22px, -webkit-linear-gradient(center bottom, white 85%, #eeeeee 99%);
@@ -374,14 +389,7 @@
   padding: 0;
 }
 
-.chzntree-container-single .chzntree-search input {
-  width: 100%;
-  box-sizing: border-box;
-  -webkit-box-sizing:border-box;
-  -moz-box-sizing: border-box;
-}
-
-.chzntree-container-single .chzntree-search input.searching {
+.chzntree-container-single .chzntree-search input[type='text'].searching {
   background:url(images/throbber.gif) no-repeat 99% 6px !important;
 }
 

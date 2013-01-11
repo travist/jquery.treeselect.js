@@ -10,6 +10,7 @@
       selected: null,             /** Callback when an item is selected. */
       treeloaded: null,           /** Called when the tree is loaded. */
       load: null,                 /** Callback to load new tree's */
+      searcher: null,             /** Callback to search a tree */
       deepLoad: false,            /** Performs a deep load */
       onbuild: null,              /** Called when each node is building. */
       postbuild: null,            /** Called when the node is done building. */
@@ -633,22 +634,53 @@
         // Convert the text to lowercase.
         text = text.toLowerCase();
 
-        // Load all nodes.
-        this.loadAll(function(node) {
+        // See if they provided a search endpoint.
+        if (params.searcher) {
 
-          // Callback with the results of this search.
-          if (callback) {
+          // Call the searcher for the new nodes.
+          params.searcher(this, text, function(nodes, getNode) {
+            var treenode = null;
+            for (var id in nodes) {
+
+              // Set the treenode.
+              treenode = new TreeNode(getNode ? getNode(nodes[id]) : nodes[id]);
+
+              // Say this node is loaded.
+              treenode.nodeloaded = true;
+
+              // Add to the loaded nodes array.
+              loadedNodes[treenode.id] = treenode.id;
+
+              // Build the node.
+              treenode.build();
+
+              // Add the node to the results.
+              results[id] = treenode;
+            }
+
+            // Callback with the search results.
             callback(results, true);
-          }
-        }, function(node) {
+          });
+        }
+        else {
 
-          // If we are not the root node, and the text matches the title.
-          if (!node.root && node.title.toLowerCase().search(text) !== -1) {
+          // Load all nodes.
+          this.loadAll(function(node) {
 
-            // Add this to our search results.
-            results[node.id] = node;
-          }
-        }, true);
+            // Callback with the results of this search.
+            if (callback) {
+              callback(results, true);
+            }
+          }, function(node) {
+
+            // If we are not the root node, and the text matches the title.
+            if (!node.root && node.title.toLowerCase().search(text) !== -1) {
+
+              // Add this to our search results.
+              results[node.id] = node;
+            }
+          }, true);
+        }
       }
     };
 
@@ -686,8 +718,15 @@
         }
       }
 
+      // Create an init node to show that the tree is busy.
+      var initBusy = $(document.createElement('span')).addClass('treebusy');
+      root.display.append(initBusy);
+
       // Load the node.
       root.loadNode(function(node) {
+
+        // Remove the init node.
+        initBusy.remove();
 
         if (node.children.length == 0) {
 
@@ -734,6 +773,8 @@
       description: '',                  /** The description for the input. */
       input_placeholder: 'Select Item', /** The input placeholder text. */
       input_type: 'text',               /** Define the input type. */
+      autosearch: false,                /** If we would like to autosearch. */
+      search_text: 'Search',            /** The search button text. */
       no_results_text: 'No results found', /** Shown when no results. */
       min_height: 100,                  /** The miniumum height. */
       more_text: '+%num% more',         /** The text to show in the more. */
@@ -750,6 +791,7 @@
       var choices = null;
       var search = null;
       var input = null;
+      var search_btn = null;
       var label = null;
       var loading = null;
       var description = null;
@@ -819,17 +861,8 @@
           // Need to make room for the search symbol.
           input.addClass('chosentree-search');
 
-          // Keep track of a search timeout.
-          var searchTimeout = 0;
-
-          // Setup a variable to keep track of inputs.
-          var inputValue = '';
-
-          // Bind to the input when they type.
-          input.bind('input', function inputSearch() {
-
-            // Get the input value.
-            inputValue = input.val();
+          // Perform the search.
+          var doSearch = function(inputValue) {
 
             // We want to make sure we don't try while it is searching...
             // And also don't want to search if the input is one character...
@@ -842,61 +875,83 @@
                 input.addClass('searching');
 
                 // Search the tree node.
-                root.search(inputValue, (function(oldValue) {
-                  return function(nodes, searchResults) {
+                root.search(inputValue, function(nodes, searchResults) {
 
-                    // Say we are no longer searching...
-                    input.removeClass('searching');
+                  // Say we are no longer searching...
+                  input.removeClass('searching');
 
-                    // If the old value is different than the new value.
-                    if (inputValue != oldValue) {
+                  // Iterate over the nodes and append them to the search.
+                  var count = 0;
+                  root.childlist.children().detach();
 
-                      // Run the search with the new value.
-                      inputSearch();
+                  // Add a class to distinguish if this is search results.
+                  if (searchResults) {
+                    root.childlist.addClass('chzntree-search-results');
+                  }
+                  else {
+                    root.childlist.removeClass('chzntree-search-results');
+                  }
+
+                  // Iterate through our nodes.
+                  for (var i in nodes) {
+                    count++;
+
+                    // Use either the search item or the display.
+                    if (searchResults) {
+                      root.childlist.append(nodes[i].searchItem);
                     }
                     else {
-
-                      // Iterate over the nodes and append them to the search.
-                      var count = 0;
-                      root.childlist.children().detach();
-
-                      // Add a class to distinguish if this is search results.
-                      if (searchResults) {
-                        root.childlist.addClass('chzntree-search-results');
-                      }
-                      else {
-                        root.childlist.removeClass('chzntree-search-results');
-                      }
-
-                      // Iterate through our nodes.
-                      for (var i in nodes) {
-                        count++;
-
-                        // Use either the search item or the display.
-                        if (searchResults) {
-                          root.childlist.append(nodes[i].searchItem);
-                        }
-                        else {
-                          root.childlist.append(nodes[i].display);
-                        }
-                      }
-
-                      if (!count) {
-                        var txt = '<li>' + params.no_results_text + '</li>';
-                        root.childlist.append(txt);
-                      }
+                      root.childlist.append(nodes[i].display);
                     }
-                  };
-                })(inputValue));
+                  }
+
+                  if (!count) {
+                    var txt = '<li>' + params.no_results_text + '</li>';
+                    root.childlist.append(txt);
+                  }
+                });
+
+                // A search was performed.
+                return true;
               }
             }
-            else {
 
-              // Check again in 1 second.
-              clearTimeout(searchTimeout);
-              searchTimeout = setTimeout(inputSearch, 1000);
-            }
-          });
+            // A search was not performed.
+            return false;
+          };
+
+          // If they wish to autosearch.
+          if (params.autosearch) {
+
+            // Keep track of a search timeout.
+            var searchTimeout = 0;
+
+            // Bind to the input when they type.
+            input.bind('input', function inputSearch() {
+              if (!doSearch(input.val())) {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(inputSearch, 1000);
+              }
+            });
+
+            // Add the autosearch.
+            search.addClass('autosearch');
+          }
+          else {
+            search_btn = $(document.createElement('input'));
+            search_btn.attr({
+              'type': 'button',
+              'value': params.search_text
+            });
+            search_btn.addClass('chosentree-search-btn');
+            search_btn.bind('click', function(event) {
+              event.preventDefault();
+              doSearch(input.val());
+            });
+
+            // Add the autosearch.
+            search.addClass('manualsearch');
+          }
         }
         else {
 
@@ -905,6 +960,11 @@
         }
 
         search.append(input);
+
+        // Append the search button if it exists.
+        if (search_btn) {
+          search.append(search_btn);
+        }
       }
 
       // Creat the chosen selector.

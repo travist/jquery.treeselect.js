@@ -10,6 +10,7 @@
       selected: null,             /** Callback when an item is selected. */
       treeloaded: null,           /** Called when the tree is loaded. */
       load: null,                 /** Callback to load new tree's */
+      searcher: null,             /** Callback to search a tree */
       deepLoad: false,            /** Performs a deep load */
       onbuild: null,              /** Called when each node is building. */
       postbuild: null,            /** Called when the node is done building. */
@@ -633,22 +634,53 @@
         // Convert the text to lowercase.
         text = text.toLowerCase();
 
-        // Load all nodes.
-        this.loadAll(function(node) {
+        // See if they provided a search endpoint.
+        if (params.searcher) {
 
-          // Callback with the results of this search.
-          if (callback) {
+          // Call the searcher for the new nodes.
+          params.searcher(this, text, function(nodes, getNode) {
+            var treenode = null;
+            for (var id in nodes) {
+
+              // Set the treenode.
+              treenode = new TreeNode(getNode ? getNode(nodes[id]) : nodes[id]);
+
+              // Say this node is loaded.
+              treenode.nodeloaded = true;
+
+              // Add to the loaded nodes array.
+              loadedNodes[treenode.id] = treenode.id;
+
+              // Build the node.
+              treenode.build();
+
+              // Add the node to the results.
+              results[id] = treenode;
+            }
+
+            // Callback with the search results.
             callback(results, true);
-          }
-        }, function(node) {
+          });
+        }
+        else {
 
-          // If we are not the root node, and the text matches the title.
-          if (!node.root && node.title.toLowerCase().search(text) !== -1) {
+          // Load all nodes.
+          this.loadAll(function(node) {
 
-            // Add this to our search results.
-            results[node.id] = node;
-          }
-        }, true);
+            // Callback with the results of this search.
+            if (callback) {
+              callback(results, true);
+            }
+          }, function(node) {
+
+            // If we are not the root node, and the text matches the title.
+            if (!node.root && node.title.toLowerCase().search(text) !== -1) {
+
+              // Add this to our search results.
+              results[node.id] = node;
+            }
+          }, true);
+        }
       }
     };
 
@@ -686,8 +718,15 @@
         }
       }
 
+      // Create an init node to show that the tree is busy.
+      var initBusy = $(document.createElement('span')).addClass('treebusy');
+      root.display.append(initBusy);
+
       // Load the node.
       root.loadNode(function(node) {
+
+        // Remove the init node.
+        initBusy.remove();
 
         if (node.children.length == 0) {
 
