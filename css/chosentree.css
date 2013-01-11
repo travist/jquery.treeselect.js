@@ -389,7 +389,7 @@
 }
 
 .chzntree-container-single .chzntree-search input[type='text'].searching {
-  background:url(images/throbber.gif) no-repeat 99% 6px !important;
+  background:url(images/throbber.gif) no-repeat 99% 12px !important;
 }
 
 .chzntree-search-results .treeselect-title{
