@@ -106,6 +106,23 @@
         return;
       }
 
+      var triggerCallback = (function(treenode) {
+        return function() {
+          // Callback that we are loaded.
+          if (callback) {
+            callback(treenode);
+          }
+
+          // Process the loadqueue.
+          for (var i in treenode.loadqueue) {
+            treenode.loadqueue[i](treenode);
+          }
+
+          // Empty the loadqueue.
+          treenode.loadqueue.length = 0;
+        };
+      })(this);
+
       // Say we are loading.
       this.loading = true;
 
@@ -138,17 +155,7 @@
             }
 
             // Callback that we are loaded.
-            if (callback) {
-              callback(treenode);
-            }
-
-            // Process the loadqueue.
-            for (var i in treenode.loadqueue) {
-              treenode.loadqueue[i](treenode);
-            }
-
-            // Empty the loadqueue.
-            treenode.loadqueue.length = 0;
+            triggerCallback();
 
             // Say we are not busy.
             if (!hideBusy) {
@@ -160,7 +167,7 @@
       else if (callback) {
 
         // Just callback since we are already loaded.
-        callback(this);
+        triggerCallback();
       }
 
       // Say that we are not loading anymore.
