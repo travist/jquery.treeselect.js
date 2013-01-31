@@ -295,7 +295,7 @@
                   $('li#choice_' + node.id, choices).remove();
 
                   // Deselect this node.
-                  node.select(false);
+                  node.selectChildren(false);
                 });
               }
 
