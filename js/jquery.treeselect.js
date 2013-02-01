@@ -260,7 +260,7 @@
         // If there are no children, then we need to load them.
         this.loadNode(function(node) {
           if (node.checked) {
-            node.select(node.checked);
+            node.selectChildren(node.checked);
           }
           node.expand(true);
         });
@@ -269,11 +269,41 @@
 
     /**
      * Selects all children of this node.
+     *
+     * @param {boolean} state The state of the selection.
+     * @param {boolean} indirect TRUE - indirect selection, FALSE - direct.
      */
-    TreeNode.prototype.selectChildren = function(state) {
-      var i = this.children.length;
-      while (i--) {
-        this.children[i].select(state, true);
+    TreeNode.prototype.selectChildren = function(state, indirect) {
+      // If they wish to deep load then do that here - base the check on the
+      // state passed in rather than the checked state of the input, because
+      // the input may not have been checked if it is not a selectable input.
+      if (state && params.deepLoad && !indirect) {
+
+        // Load all nodes underneath this node.
+        this.loadAll(function(node) {
+
+          // Now select the children.
+          var i = node.children.length;
+          while (i--) {
+            node.children[i].select(state);
+            node.children[i].selectChildren(state, true);
+          }
+          if (params.selected) {
+            params.selected(node, !indirect);
+          }
+        });
+      }
+      else {
+
+        // Now select the children.
+        var i = this.children.length;
+        while (i--) {
+          this.children[i].select(state);
+          this.children[i].selectChildren(state, true);
+        }
+        if (params.selected) {
+          params.selected(this, !indirect);
+        }
       }
     };
 
@@ -298,9 +328,8 @@
      * Selects a node.
      *
      * @param {boolean} state The state of the selection.
-     * @param {boolean} indirect TRUE - indirect selection, FALSE - direct.
      */
-    TreeNode.prototype.select = function(state, indirect) {
+    TreeNode.prototype.select = function(state) {
 
       // Only check this node if it is a selectable input.
       if (!this.input.hasClass('treenode-no-select')) {
@@ -313,29 +342,6 @@
 
       }
 
-      // If they wish to deep load then do that here - base the check on the
-      // state passed in rather than the checked state of the input, because
-      // the input may not have been checked if it is not a selectable input.
-      if (state && params.deepLoad) {
-
-        // Load all nodes underneath this node.
-        this.loadAll(function(node) {
-
-          // Now select the children.
-          node.selectChildren(state);
-          if (params.selected) {
-            params.selected(node, !indirect);
-          }
-        });
-      }
-      else {
-
-        // Now select the children.
-        this.selectChildren(state);
-        if (params.selected) {
-          params.selected(this, !indirect);
-        }
-      }
     };
 
     /**
@@ -389,7 +395,7 @@
               node.expand(checked);
 
               // Call the select method.
-              node.select(checked);
+              node.selectChildren(checked);
             };
           })(this));
 
@@ -743,7 +749,7 @@
 
         // If this node is checked, then check it.
         if (node.checked) {
-          node.select(node.checked);
+          node.selectChildren(node.checked);
         }
 
         // Expand this root node.
