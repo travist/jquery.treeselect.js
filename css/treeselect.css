@@ -88,7 +88,7 @@
   background:url(images/expanded.gif) no-repeat 0 0;
 }
 
-.treeselect span.treebusy {
+.treeselect span.treebusy, .treeselect span.treebusy.treeselect-expand.expanded, .treeselect span.treebusy.treeselect-expand.collapsed  {
   background:url(images/throbber.gif) no-repeat 0 0;
   width:16px;
   height:10px;

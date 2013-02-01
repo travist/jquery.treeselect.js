@@ -9,7 +9,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css">
     <script type='text/javascript' src='lib/jquery.moreorless.js/jquery.moreorless.js'></script>
-    <script type='text/javascript' src='js/jquery.treeselect.js?random=12324234'></script>
+    <script type='text/javascript' src='js/jquery.treeselect.js'></script>
     <script type='text/javascript' src='js/jquery.chosentree.js'></script>
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
     <link rel='stylesheet' type='text/css' href='lib/jquery.moreorless.js/moreorless.css' />
@@ -19,7 +19,7 @@
       var maxDepth = 8;
       var loadChildren = function(node, level) {
         var hasChildren = node.level < maxDepth;
-        for (var i=0; i<2; i++) {
+        for (var i=0; i<10; i++) {
           var id = node.id + (i+1).toString();
           node.children.push({
             id:id,

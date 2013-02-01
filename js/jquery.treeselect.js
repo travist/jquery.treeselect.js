@@ -23,6 +23,10 @@
     /** Keep track of all loaded nodes */
     var loadedNodes = {};
 
+    /** Variable for the busy states. */
+    var busyloading = 'treebusy-loading';
+    var busyselecting = 'treebusy-selecting';
+
     /**
      * Constructor.
      */
@@ -68,15 +72,29 @@
     /**
      * Set the busy cursor for this node.
      */
-    TreeNode.prototype.setBusy = function(state) {
-      if (state != this.span.hasClass('treebusy')) {
+    TreeNode.prototype.setBusy = function(state, type) {
+
+      // Make sure the state has changed.
+      if (state != this.span.hasClass(type)) {
         this.busy = state;
         if (state) {
+
+          // Set the busy type and treebusy.
+          this.span.addClass(type);
           this.span.addClass('treebusy');
         }
         else {
-          this.span.removeClass('treebusy');
+
+          // Remove the busy type.
+          this.span.removeClass(type);
+
+          // Only remove the busy if the busy flags are empty.
+          var othertype = (type == busyloading) ? busyselecting : busyloading;
+          if (!this.span.hasClass(othertype)) {
+            this.span.removeClass('treebusy');
+          }
         }
+
       }
     };
 
@@ -131,7 +149,7 @@
 
         // Make this node busy.
         if (!hideBusy) {
-          this.setBusy(true);
+          this.setBusy(true, busyloading);
         }
 
         // Call the load function.
@@ -159,7 +177,7 @@
 
             // Say we are not busy.
             if (!hideBusy) {
-              treenode.setBusy(false);
+              treenode.setBusy(false, busyloading);
             }
           };
         })(this));
@@ -207,32 +225,38 @@
 
         // Make this node busy.
         if (!hideBusy) {
-          node.setBusy(true);
+          node.setBusy(true, busyloading);
         }
 
         // Iterate through each child.
         while (i--) {
 
-          // Load this childs children...
-          node.children[i].loadAll(function() {
+          // Load recurssion on a separate thread.
+          setTimeout((function(index) {
+            return function() {
 
-            // Decrement the child count.
-            count--;
+              // Load this childs children...
+              node.children[index].loadAll(function() {
 
-            // If all children are done loading, call the callback.
-            if (!count) {
+                // Decrement the child count.
+                count--;
 
-              // Callback that we are done loading this tree.
-              if (callback) {
-                callback(node);
-              }
+                // If all children are done loading, call the callback.
+                if (!count) {
 
-              // Make this node busy.
-              if (!hideBusy) {
-                node.setBusy(false);
-              }
-            }
-          }, operation, hideBusy, ids);
+                  // Callback that we are done loading this tree.
+                  if (callback) {
+                    callback(node);
+                  }
+
+                  // Make this node busy.
+                  if (!hideBusy) {
+                    node.setBusy(false, busyloading);
+                  }
+                }
+              }, operation, hideBusy, ids);
+            };
+          })(i), 2);
         }
       });
     };
@@ -274,6 +298,35 @@
      * @param {boolean} indirect TRUE - indirect selection, FALSE - direct.
      */
     TreeNode.prototype.selectChildren = function(state, indirect) {
+
+      // Select the loaded children.
+      var selectLoaded = (function(node) {
+        return function() {
+
+          // Set this node busy.
+          node.setBusy(true, busyselecting);
+
+          // Now select the children.
+          var i = node.children.length;
+          while (i--) {
+            node.children[i].select(state);
+
+            // Perform recurrsion on a separate thread.
+            setTimeout((function(index) {
+              return function() {
+                node.children[index].selectChildren(state, true);
+              };
+            })(i), 2);
+          }
+          if (params.selected) {
+            params.selected(node, !indirect);
+          }
+
+          // Set this node not busy.
+          node.setBusy(false, busyselecting);
+        };
+      })(this);
+
       // If they wish to deep load then do that here - base the check on the
       // state passed in rather than the checked state of the input, because
       // the input may not have been checked if it is not a selectable input.
@@ -282,28 +335,14 @@
         // Load all nodes underneath this node.
         this.loadAll(function(node) {
 
-          // Now select the children.
-          var i = node.children.length;
-          while (i--) {
-            node.children[i].select(state);
-            node.children[i].selectChildren(state, true);
-          }
-          if (params.selected) {
-            params.selected(node, !indirect);
-          }
+          // Select the loaded children.
+          selectLoaded();
         });
       }
       else {
 
-        // Now select the children.
-        var i = this.children.length;
-        while (i--) {
-          this.children[i].select(state);
-          this.children[i].selectChildren(state, true);
-        }
-        if (params.selected) {
-          params.selected(this, !indirect);
-        }
+        // Select the loaded children.
+        selectLoaded();
       }
     };
 
@@ -339,9 +378,7 @@
 
         // Make sure the input is checked accordingly.
         this.input.attr('checked', state);
-
       }
-
     };
 
     /**
