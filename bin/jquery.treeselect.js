@@ -811,12 +811,12 @@
         if (defaults) {
 
           // Select the children based on the defaults.
-          this.selectChildren(defaults, function() {
-            doneLoading.call(this);
+          node.selectChildren(defaults, function() {
+            doneLoading.call(node);
           });
         }
         else {
-          doneLoading.call(this);
+          doneLoading.call(node);
         }
       });
 
