@@ -16,10 +16,10 @@
     <link rel='stylesheet' type='text/css' href='css/treeselect.css' />
     <link rel='stylesheet' type='text/css' href='css/chosentree.css' />
     <script type='text/javascript'>
-      var maxDepth = 6;
+      var maxDepth = 3;
       var loadChildren = function(node, level) {
         var hasChildren = node.level < maxDepth;
-        for (var i=0; i<5; i++) {
+        for (var i=0; i<8; i++) {
           var id = node.id + (i+1).toString();
           node.children.push({
             id:id,

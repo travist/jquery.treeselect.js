@@ -34,7 +34,6 @@
       var input = null;
       var search_btn = null;
       var label = null;
-      var loading = null;
       var description = null;
       var treeselect = null;
       var treewrapper = null;
@@ -228,11 +227,6 @@
       treewrapper.addClass('treewrapper');
       treewrapper.hide();
 
-      // Create a loading span.
-      loading = $(document.createElement('span')).attr({
-        'class': 'tree-loading treebusy'
-      }).css('display', 'block');
-
       // Get the tree select.
       treeselect = $(document.createElement('div'));
       treeselect.addClass('treeselect');
@@ -245,7 +239,7 @@
       });
 
       // Add the treeselect widget.
-      treewrapper.append(treeselect.append(loading));
+      treewrapper.append(treeselect);
       $(this).append(selector.append(treewrapper));
 
       // Add the description.
@@ -256,16 +250,46 @@
 
       // Reset the selected callback.
       treeparams.selected = (function(chosentree) {
+
+        // Keep track of the selected nodes.
+        var selectedNodes = {};
+
+        // The node callback.
         return function(node, direct) {
 
-          // Get the existing choices.
-          var selected_choice = $('li#choice_' + node.id, choices);
-
-          // Only add if this node is valid.
+          // If this is a valid node.
           if (node.id) {
+
+            // Get the existing choices.
+            var selected_choice = $('li#choice_' + node.id, choices);
 
             // Add the choice if not already added.
             if (node.checked && (selected_choice.length == 0)) {
+
+              // Add this to the selected nodes.
+              selectedNodes[node.id] = node;
+            }
+            else if (!node.checked) {
+
+              // If not selected, then remove the choice.
+              selected_choice.remove();
+            }
+          }
+
+          // If we are done selecting.
+          if (direct) {
+
+            // Set the chosentree value.
+            chosentree.value = {};
+
+            // Iterate through all the selected nodes.
+            for (var id in selectedNodes) {
+
+              // Set the node.
+              node = selectedNodes[id];
+
+              // Add to the chosen tree value.
+              chosentree.value[id] = node;
 
               // Get and add a new choice.
               var choice = $(document.createElement('li'));
@@ -300,41 +324,28 @@
               }
 
               // Add this to the choices.
-              search.before(choice.append(span).append(close));
+              choices.prepend(choice.append(span).append(close));
             }
-            else if (!node.checked) {
-
-              // If not selected, then remove the choice.
-              selected_choice.remove();
-            }
-          }
-
-          // Make sure we don't do this often for performance.
-          if (direct) {
-
-            // Get all of the nodes that are selected.
-            var nodes = [];
-            chosentree.value = {};
 
             // Show the choices.
             choices.show();
+
+            // Reset the selected nodes.
+            selectedNodes = {};
 
             // Don't show the default value if the root has not children.
             if (input && node.children.length == 0) {
               input.attr({'value': ''});
             }
 
-            // Add the selected items to the choices.
-            $('li.search-choice', choices).each(function() {
-              chosentree.value[this.nodeData.id] = this.nodeData.value;
-              nodes.push(this.nodeData);
-            });
-
             // Show more or less.
             if (jQuery.fn.moreorless) {
 
+              // Get how many nodes there are.
+              var numNodes = $('li.search-choice', choices).length;
+
               // Add this to the choices.
-              var more_text = params.more_text.replace('%num%', nodes.length);
+              var more_text = params.more_text.replace('%num%', numNodes);
               choices.moreorless(params.min_height, more_text);
               if (!choices.div_expanded) {
                 showTree(true, null);
@@ -353,11 +364,6 @@
           }
         };
       })(this);
-
-      // Add the treeloaded event.
-      treeparams.treeloaded = function(node) {
-        loading.remove();
-      };
 
       // Now declare our treeselect control.
       treeselect.treeselect(treeparams);

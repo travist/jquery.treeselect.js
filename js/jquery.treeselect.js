@@ -25,6 +25,7 @@
 
     /** Variable for the busy states. */
     var busyloading = 'treebusy-loading';
+    var busyloadingall = 'treebusy-loading-all';
     var busyselecting = 'treebusy-selecting';
 
     /**
@@ -221,7 +222,7 @@
         // If no children, then just call the callback immediately.
         if (!i || ids.hasOwnProperty(node.id)) {
           if (callback) {
-            callback(node);
+            callback.call(node, node);
           }
           return;
         }
@@ -231,7 +232,7 @@
 
         // Make this node busy.
         if (!hideBusy) {
-          node.setBusy(true, busyloading);
+          node.setBusy(true, busyloadingall);
         }
 
         // Iterate through each child.
@@ -252,12 +253,12 @@
 
                   // Callback that we are done loading this tree.
                   if (callback) {
-                    callback(node);
+                    callback.call(node, node);
                   }
 
                   // Make this node busy.
                   if (!hideBusy) {
-                    node.setBusy(false, busyloading);
+                    node.setBusy(false, busyloadingall);
                   }
                 }
               }, operation, hideBusy, ids);
@@ -271,7 +272,6 @@
      * Expands the node.
      */
     TreeNode.prototype.expand = function(state) {
-      this.checked = this.input.is(':checked');
       if (state) {
         this.link.removeClass('collapsed').addClass('expanded');
         this.span.removeClass('collapsed').addClass('expanded');
@@ -300,73 +300,41 @@
     /**
      * Selects all children of this node.
      *
-     * @param {boolean} state The state of the selection.
-     * @param {boolean} indirect TRUE - indirect selection, FALSE - direct.
+     * @param {boolean} state The state of the selection or array of defaults.
+     * @param {function} done Called when we are done selecting.
      */
-    TreeNode.prototype.selectChildren = function(state, indirect) {
+    TreeNode.prototype.selectChildren = function(state, done) {
 
-      // Select the loaded children.
-      var selectLoaded = (function(node) {
-        return function() {
+      // See if the state is a boolean.
+      var defaults = (typeof state == 'object');
 
-          // Set this node busy.
-          node.setBusy(true, busyselecting);
+      // Load all nodes underneath this node.
+      this.loadAll(function() {
 
-          // Now select the children.
-          var i = node.children.length;
-          while (i--) {
-            node.children[i].select(state);
+        // Say this node is now fully selected.
+        if (params.selected) {
+          params.selected(this, true);
+        }
 
-            // Perform recurrsion on a separate thread.
-            setTimeout((function(index) {
-              return function() {
-                node.children[index].selectChildren(state, true);
-              };
-            })(i), 2);
-          }
-          if (params.selected) {
-            params.selected(node, !indirect);
-          }
+        // Set this node not busy.
+        this.setBusy(false, busyselecting);
 
-          // Set this node not busy.
-          node.setBusy(false, busyselecting);
-        };
-      })(this);
+        // Say we are now done.
+        if (done) {
+          done.call(this);
+        }
 
-      // If they wish to deep load then do that here - base the check on the
-      // state passed in rather than the checked state of the input, because
-      // the input may not have been checked if it is not a selectable input.
-      if (state && params.deepLoad && !indirect) {
+      }, function(node) {
 
-        // Load all nodes underneath this node.
-        this.loadAll(function(node) {
+        var val = state;
+        if (defaults) {
+          val = state.hasOwnProperty(node.value);
+          val |= state.hasOwnProperty(node.id);
+        }
 
-          // Select the loaded children.
-          selectLoaded();
-        });
-      }
-      else {
-
-        // Select the loaded children.
-        selectLoaded();
-      }
-    };
-
-    /**
-     * Check this node.
-     */
-    TreeNode.prototype.check = function(state) {
-
-      // Set the checked state.
-      this.checked = state;
-
-      // Make sure the input is checked accordingly.
-      this.input.attr('checked', state);
-
-      // Select this node.
-      if (params.selected) {
-        params.selected(this, true);
-      }
+        // Select this node.
+        node.select(val);
+      });
     };
 
     /**
@@ -379,11 +347,19 @@
       // Only check this node if it is a selectable input.
       if (!this.input.hasClass('treenode-no-select')) {
 
+        // Convert state to a boolean.
+        state = !!state;
+
         // Set the checked state.
         this.checked = state;
 
         // Make sure the input is checked accordingly.
         this.input.attr('checked', state);
+
+        // Say that this node is selected.
+        if (params.selected) {
+          params.selected(this);
+        }
       }
     };
 
@@ -431,14 +407,14 @@
           this.input.bind('click', (function(node) {
             return function(event) {
 
-              // Determine if the input is checked.
-              var checked = $(event.target).is(':checked');
+              // Set the checked state based on input.
+              node.checked = $(event.target).is(':checked');
 
               // Expand if checked.
-              node.expand(checked);
+              node.expand(node.checked);
 
               // Call the select method.
-              node.selectChildren(checked);
+              node.selectChildren(node.checked);
             };
           })(this));
 
@@ -550,20 +526,26 @@
               exclude: this.exclude
             }));
 
-            // Add the child tree to the list.
-            this.children[i].build(function(node) {
+            // Set timeout to help with recursion.
+            setTimeout((function(treenode, index) {
+              return function() {
 
-              // Decrement the number of children loaded.
-              numChildren--;
+                // Add the child tree to the list.
+                treenode.children[index].build(function(child) {
 
-              // Append the child to the list.
-              this.childlist.append(node.display);
+                  // Decrement the number of children loaded.
+                  numChildren--;
 
-              // If there are no more chlidren, then say we are done.
-              if (!numChildren) {
-                done.call(this, this.childlist);
-              }
-            });
+                  // Append the child to the list.
+                  treenode.childlist.append(child.display);
+
+                  // If there are no more chlidren, then say we are done.
+                  if (!numChildren) {
+                    done.call(treenode, treenode.childlist);
+                  }
+                });
+              };
+            })(this, i), 2);
           }
         }
       }
@@ -581,10 +563,6 @@
 
       // Keep track of the left margin for each element.
       var left = 5, elem = null;
-
-      // Detatch the display for speed.
-      var parentElement = this.display.parent();
-      this.display.detach();
 
       // Create the list display.
       if (this.display.length == 0) {
@@ -647,9 +625,6 @@
           }
         }
 
-        // Reattach the display when we are done building.
-        parentElement.append(this.display);
-
         // If they wish to know when we are done building.
         if (done) {
           done.call(this, this);
@@ -678,33 +653,6 @@
         return this.selectAllText;
       }
       return false;
-    };
-
-    /**
-     * Sets the defaults for this node.
-     *
-     * @param {function} callback Called all defaults are set.
-     */
-    TreeNode.prototype.setDefault = function(defaults, callback) {
-
-      // Make sure the defaults is set.
-      if (!jQuery.isEmptyObject(defaults)) {
-
-        // Load all nodes and apply a default to them.
-        this.loadAll(function(node) {
-          if (callback) {
-            callback(node);
-          }
-        }, function(node) {
-          if (defaults.hasOwnProperty(node.value) ||
-              defaults.hasOwnProperty(node.id)) {
-            node.check(true);
-          }
-        });
-      }
-      else if (callback) {
-        callback(this);
-      }
     };
 
     /**
@@ -809,9 +757,6 @@
         }).bind('click', (function(node) {
           return function(event) {
             node.selectChildren($(event.target).is(':checked'));
-            if (params.selected) {
-              params.selected(node, true);
-            }
           };
         })(root)));
 
@@ -824,36 +769,55 @@
         }
       }
 
-      // Create an init node to show that the tree is busy.
+      // Create a loading span.
       var initBusy = $(document.createElement('span')).addClass('treebusy');
-      root.display.append(initBusy);
+      root.display.append(initBusy.css('display', 'block'));
+
+      // Called when the root node is done loading.
+      var doneLoading = function() {
+
+        // Remove the init busy cursor.
+        initBusy.remove();
+
+        // Call the treeloaded params.
+        if (params.treeloaded) {
+          params.treeloaded(this);
+        }
+      };
 
       // Load the node.
       root.loadNode(function(node) {
 
-        // Remove the init node.
-        initBusy.remove();
-
+        // Check the length of children in this node.
         if (node.children.length == 0) {
 
           // If the root node does not have any children, then hide.
           node.display.hide();
         }
 
-        // If this node is checked, then check it.
-        if (node.checked) {
-          node.selectChildren(node.checked);
-        }
-
         // Expand this root node.
         node.expand(true);
 
-        // Now set the defaults.
-        node.setDefault(params.default_value, function(node) {
-          if (params.treeloaded) {
-            params.treeloaded(node);
-          }
-        });
+        // Select this node based on the default value.
+        node.select(node.checked);
+
+        // Set the defaults for all the children.
+        var defaults = node.checked;
+        if (!jQuery.isEmptyObject(params.default_value)) {
+          defaults = params.default_value;
+        }
+
+        // If there are defaults, then select the children with them.
+        if (defaults) {
+
+          // Select the children based on the defaults.
+          this.selectChildren(defaults, function() {
+            doneLoading.call(this);
+          });
+        }
+        else {
+          doneLoading.call(this);
+        }
       });
 
       // If the root element doesn't have children, then hide the treeselect.

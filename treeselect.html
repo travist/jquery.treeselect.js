@@ -3,6 +3,7 @@
     $('div.chosentree').chosentree({
       width: 500,
       deepLoad: true,
+      showtree: true,
       load: function(node, callback) {
         setTimeout(function() {
           callback(loadChildren(node, 0));
