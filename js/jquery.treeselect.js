@@ -124,22 +124,27 @@
         return;
       }
 
-      var triggerCallback = (function(treenode) {
-        return function() {
-          // Callback that we are loaded.
-          if (callback) {
-            callback(treenode);
-          }
+      // Trigger the callback when the node is done loading.
+      var triggerCallback = function() {
 
-          // Process the loadqueue.
-          for (var i in treenode.loadqueue) {
-            treenode.loadqueue[i](treenode);
-          }
+        // Callback that we are loaded.
+        if (callback) {
+          callback(this);
+        }
 
-          // Empty the loadqueue.
-          treenode.loadqueue.length = 0;
-        };
-      })(this);
+        // Process the loadqueue.
+        for (var i in this.loadqueue) {
+          this.loadqueue[i](this);
+        }
+
+        // Empty the loadqueue.
+        this.loadqueue.length = 0;
+
+        // Say we are not busy.
+        if (!hideBusy) {
+          this.setBusy(false, busyloading);
+        }
+      };
 
       // Say we are loading.
       this.loading = true;
@@ -169,15 +174,16 @@
               loadedNodes[treenode.id] = treenode.id;
 
               // Build the node.
-              treenode.build();
+              treenode.build(function() {
+
+                // Callback that we are loaded.
+                triggerCallback.call(treenode);
+              });
             }
+            else {
 
-            // Callback that we are loaded.
-            triggerCallback();
-
-            // Say we are not busy.
-            if (!hideBusy) {
-              treenode.setBusy(false, busyloading);
+              // Callback that we are loaded.
+              triggerCallback.call(treenode);
             }
           };
         })(this));
@@ -185,7 +191,7 @@
       else if (callback) {
 
         // Just callback since we are already loaded.
-        triggerCallback();
+        triggerCallback.call(this);
       }
 
       // Say that we are not loading anymore.
@@ -510,7 +516,7 @@
     /**
      * Build the children.
      */
-    TreeNode.prototype.build_children = function() {
+    TreeNode.prototype.build_children = function(done) {
 
       // Create the childlist element.
       this.childlist = $();
@@ -523,6 +529,9 @@
 
         // Set the odd state.
         var odd = this.odd;
+
+        // Get the number of children.
+        var numChildren = this.children.length;
 
         // Now if there are children, iterate and build them.
         for (var i in this.children) {
@@ -541,23 +550,41 @@
               exclude: this.exclude
             }));
 
-            // Now append the built children to this list.
-            this.childlist.append(this.children[i].build());
+            // Add the child tree to the list.
+            this.children[i].build(function(node) {
+
+              // Decrement the number of children loaded.
+              numChildren--;
+
+              // Append the child to the list.
+              this.childlist.append(node.display);
+
+              // If there are no more chlidren, then say we are done.
+              if (!numChildren) {
+                done.call(this, this.childlist);
+              }
+            });
           }
         }
       }
+      else {
 
-      // Return the childlist.
-      return this.childlist;
+        // Call that we are done loading this child.
+        done.call(this, this.childlist);
+      }
     };
 
     /**
      * Builds the DOM and the tree for this node.
      */
-    TreeNode.prototype.build = function() {
+    TreeNode.prototype.build = function(done) {
 
       // Keep track of the left margin for each element.
       var left = 5, elem = null;
+
+      // Detatch the display for speed.
+      var parentElement = this.display.parent();
+      this.display.detach();
 
       // Create the list display.
       if (this.display.length == 0) {
@@ -590,40 +617,57 @@
         this.display.append(this.build_title(left));
       }
 
+      // Called when the node is done building.
+      var onDone = function() {
+
+        // See if they wish to alter the build.
+        if (params.onbuild) {
+          params.onbuild(this);
+        }
+
+        // Create a search item.
+        this.searchItem = this.display.clone();
+        $('.treeselect-expand', this.searchItem).remove();
+
+        // If the search title is not a link, then make it one...
+        var searchTitle = $('div.treeselect-title', this.searchItem);
+        if (searchTitle.length > 0) {
+          searchTitle.replaceWith(this.nodeLink);
+        }
+
+        // See if they wish to hook into the postbuild process.
+        if (params.postbuild) {
+          params.postbuild(this);
+        }
+
+        // Check if this node is excluded, and hide if so.
+        if (typeof this.exclude[this.id] !== 'undefined') {
+          if ($('.treenode-input', this.display).length == 0) {
+            this.display.hide();
+          }
+        }
+
+        // Reattach the display when we are done building.
+        parentElement.append(this.display);
+
+        // If they wish to know when we are done building.
+        if (done) {
+          done.call(this, this);
+        }
+      };
+
       // Append the children.
       if (this.childlist.length == 0) {
-        this.display.append(this.build_children());
+        this.build_children(function(children) {
+          if (children.length > 0) {
+            this.display.append(children);
+          }
+          onDone.call(this);
+        });
       }
-
-      // See if they wish to alter the build.
-      if (params.onbuild) {
-        params.onbuild(this);
+      else {
+        onDone.call(this);
       }
-
-      // Create a search item.
-      this.searchItem = this.display.clone();
-      $('.treeselect-expand', this.searchItem).remove();
-
-      // If the search title is not a link, then make it one...
-      var searchTitle = $('div.treeselect-title', this.searchItem);
-      if (searchTitle.length > 0) {
-        searchTitle.replaceWith(this.nodeLink);
-      }
-
-      // See if they wish to hook into the postbuild process.
-      if (params.postbuild) {
-        params.postbuild(this);
-      }
-
-      // Check if this node is and all child nodes are excluded, and hide if so.
-      if (typeof this.exclude[this.id] !== 'undefined') {
-        if ($('.treenode-input', this.display).length == 0) {
-          this.display.hide();
-        }
-      }
-
-      // Return the display.
-      return this.display;
     };
 
     /**
@@ -690,6 +734,10 @@
           // Call the searcher for the new nodes.
           params.searcher(this, text, function(nodes, getNode) {
             var treenode = null;
+
+            // Get the number of nodes.
+            var numNodes = nodes.length;
+
             for (var id in nodes) {
 
               // Set the treenode.
@@ -702,14 +750,22 @@
               loadedNodes[treenode.id] = treenode.id;
 
               // Build the node.
-              treenode.build();
+              treenode.build(function() {
 
-              // Add the node to the results.
-              results[id] = treenode;
+                // Decrement the counter.
+                numNodes--;
+
+                // Add the node to the results.
+                results[id] = treenode;
+
+                // If no more nodes are loading, then callback.
+                if (!numNodes) {
+
+                  // Callback with the search results.
+                  callback(results, true);
+                }
+              });
             }
-
-            // Callback with the search results.
-            callback(results, true);
           });
         }
         else {
