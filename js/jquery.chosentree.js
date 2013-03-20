@@ -39,6 +39,7 @@
       var treewrapper = null;
       var selectedTimer = 0;
       var root = null;
+      var self = this;
 
       // Show or hide the tree.
       var showTree = function(show, tween) {
@@ -149,6 +150,9 @@
                     var txt = '<li>' + params.no_results_text + '</li>';
                     root.childlist.append(txt);
                   }
+
+                  // Trigger when the search is complete.
+                  $(self).trigger('search_complete');
                 });
 
                 // A search was performed.
