@@ -124,6 +124,7 @@
   -webkit-box-sizing:border-box;
   -moz-box-sizing: border-box;
   width: 100%;
+  height: auto;
 }
 
 .chzntree-container-single .chzntree-search.manualsearch input[type='text'] {
