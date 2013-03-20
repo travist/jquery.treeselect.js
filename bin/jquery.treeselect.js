@@ -17,7 +17,8 @@
       inputName: 'treeselect',    /** The input name. */
       showRoot: false,            /** Show the root item with a checkbox. */
       selectAll: false,           /** If we wish to see a select all. */
-      selectAllText: 'Select All' /** The select all text. */
+      selectAllText: 'Select All',/** The select all text. */
+      expanded: null              /** Called when a node is expanded. */
     }, params);
 
     /** Keep track of all loaded nodes */
@@ -272,16 +273,26 @@
      * Expands the node.
      */
     TreeNode.prototype.expand = function(state) {
+
+      // When we are done expanding, trigger our callback.
+      var doneExpanding = (function(node) {
+        return function() {
+          if (params.expanded) {
+            params.expanded(state, node);
+          }
+        };
+      })(this);
+
       if (state) {
         this.link.removeClass('collapsed').addClass('expanded');
         this.span.removeClass('collapsed').addClass('expanded');
-        this.childlist.show('fast');
+        this.childlist.show('fast', doneExpanding);
       }
       // Only collapse if they can open it back up.
       else if (this.span.length > 0) {
         this.link.removeClass('expanded').addClass('collapsed');
         this.span.removeClass('expanded').addClass('collapsed');
-        this.childlist.hide('fast');
+        this.childlist.hide('fast', doneExpanding);
       }
 
       // If the state is expand, but the children have not been loaded.
