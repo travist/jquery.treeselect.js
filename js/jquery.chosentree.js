@@ -264,7 +264,12 @@
             var selected_choice = $('li#choice_' + node.id, choices);
 
             // Add the choice if not already added.
-            if (node.checked && (selected_choice.length == 0)) {
+            if (node.checked) {
+
+              // If the choice is already selected, remove it.
+              if (selected_choice.length != 0) {
+                selected_choice.remove();
+              }
 
               // Add this to the selected nodes.
               selectedNodes[node.id] = node;
@@ -300,7 +305,14 @@
               choice.eq(0)[0].nodeData = node;
 
               var span = $(document.createElement('span'));
-              span.text(node.title);
+
+              // If including children below, add text to the title to say so.
+              if (!params.deepLoad && node.include_children) {
+                span.text(node.title + ' (All below)');
+              }
+              else {
+                span.text(node.title);
+              }
 
               // Don't allow them to remove the root element unless it is
               // visible and has children.
@@ -314,6 +326,9 @@
 
                   // Prevent the default.
                   event.preventDefault();
+
+                  // Get the node data.
+                  node = this.parentNode.nodeData;
 
                   // Remove the choice.
                   $('li#choice_' + node.id, choices).remove();

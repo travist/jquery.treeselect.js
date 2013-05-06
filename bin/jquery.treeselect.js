@@ -276,6 +276,13 @@
         this.link.removeClass('collapsed').addClass('expanded');
         this.span.removeClass('collapsed').addClass('expanded');
         this.childlist.show('fast');
+
+        // If this node is checked as including children, go through and select
+        // all of it's children.
+        if (!params.deepLoad && this.checked && this.include_children) {
+          this.include_children = false;
+          this.selectChildren(true);
+        }
       }
       // Only collapse if they can open it back up.
       else if (this.span.length > 0) {
@@ -308,33 +315,163 @@
       // See if the state is a boolean.
       var defaults = (typeof state == 'object');
 
-      // Load all nodes underneath this node.
-      this.loadAll(function() {
+      if (params.deepLoad) {
+
+        // Load all nodes underneath this node.
+        this.loadAll(function() {
+
+          // Say this node is now fully selected.
+          if (params.selected) {
+            params.selected(this, true);
+          }
+
+          // Set this node not busy.
+          this.setBusy(false, busyselecting);
+
+          // Say we are now done.
+          if (done) {
+            done.call(this);
+          }
+
+        }, function(node) {
+
+          var val = state;
+          if (defaults) {
+            val = state.hasOwnProperty(node.value);
+            val |= state.hasOwnProperty(node.id);
+          }
+
+          // Select this node.
+          node.select(val);
+        });
+      }
+      else {
+
+        // Select the current node.
+        this.select(state);
+        var name = params.inputName + '-' + this.value;
+        $('input[name="' + name + '-include-below"]').attr(
+          'name',
+          name
+        );
+
+        // We should load children if the current node is expanded, or the
+        // current node is being deselected and possibly has children selected
+        // below them.
+        if ((this.root === true) ||
+            (state === false && !this.include_children) ||
+            (this.link !== undefined && this.link[0] !== undefined &&
+             this.link[0].className.indexOf('expanded') !== -1)
+           ) {
+          this.include_children = false;
+          this.expand(state);
+          var i = this.children.length;
+          while (i--) {
+            this.children[i].selectChildren(state, done);
+          }
+        }
+        else {
+          // Flag this noad as including all children below if it has children.
+          if (this.has_children > 0 && state) {
+            this.include_children = true;
+            $('input[name="' + name + '"]').attr(
+              'name',
+              name + '-include-below'
+            );
+          }
+        }
 
         // Say this node is now fully selected.
         if (params.selected) {
           params.selected(this, true);
         }
 
-        // Set this node not busy.
-        this.setBusy(false, busyselecting);
-
         // Say we are now done.
         if (done) {
           done.call(this);
         }
+      }
+    };
 
-      }, function(node) {
+    /**
+     * Selects default values of the TreeNode.
+     *
+     * @param {boolean} defaults Array of defaults.
+     * @param {function} done Called when we are done selecting.
+     */
+    TreeNode.prototype.selectDefaults = function(defaults, done) {
 
-        var val = state;
-        if (defaults) {
-          val = state.hasOwnProperty(node.value);
-          val |= state.hasOwnProperty(node.id);
+      var defaultsLeft = Object.keys(defaults).length;
+
+      var defaultsQueue = [];
+      defaultsQueue.push(this);
+
+      // Loop through nodes depth first to find the defaults.
+      while (defaultsLeft > 0 && defaultsQueue.length > 0) {
+        var queueItem = defaultsQueue.shift();
+        var state = false;
+
+        // Check if the queued item is listed in the defaults.
+        if (defaults.hasOwnProperty(queueItem.value)) {
+          delete defaults[queueItem.value];
+          state = true;
+          defaultsLeft--;
+        }
+        if (defaults.hasOwnProperty(queueItem.id)) {
+          delete defaults[queueItem.id];
+          state = true;
+          defaultsLeft--;
         }
 
-        // Select this node.
-        node.select(val);
-      });
+        // Check if the queued item is listed in the defaults and is flagged to
+        // include defaults.
+        if (defaults.hasOwnProperty(queueItem.value + '-include-below')) {
+          delete defaults[queueItem.value + '-include-below'];
+          queueItem.include_children = true;
+          state = true;
+          defaultsLeft--;
+        }
+        if (defaults.hasOwnProperty(queueItem.id + '-include-below')) {
+          delete defaults[queueItem.id + '-include-below'];
+          queueItem.include_children = true;
+          state = true;
+          defaultsLeft--;
+        }
+
+        // Select the queued item.
+        queueItem.select(state);
+
+        // Set the input name to the correct value.
+        var name = params.inputName + '-' + queueItem.value;
+        $('input[name="' + name + '-include-below"]').attr('name', name);
+        if (!queueItem.root && state && queueItem.include_children) {
+          $('input[name="' + name + '"]').attr('name', name + '-include-below');
+        }
+        else if (defaultsLeft > 0) {
+          // Add this node's children to the queue.
+          var i = queueItem.children.length;
+          while (i--) {
+            defaultsQueue.push(queueItem.children[i]);
+          }
+        }
+        else if (queueItem.root && queueItem.include_children) {
+          // Select the root node's children.
+          var i = queueItem.children.length;
+          while (i--) {
+            queueItem.selectChildren(queueItem.children[i]);
+          }
+        }
+      }
+
+      // Say this node is now fully selected.
+      if (params.selected) {
+        params.selected(this, true);
+      }
+
+      // Say we are now done.
+      if (done) {
+        done.call(this);
+      }
     };
 
     /**
@@ -350,15 +487,20 @@
         // Convert state to a boolean.
         state = !!state;
 
-        // Set the checked state.
-        this.checked = state;
+        // Select the element unless the state is false and we are on the root
+        // element which isn't unselectable.
+        if (state || !this.root || (this.showRoot && this.has_children)) {
 
-        // Make sure the input is checked accordingly.
-        this.input.attr('checked', state);
+          // Set the checked state.
+          this.checked = state;
 
-        // Say that this node is selected.
-        if (params.selected) {
-          params.selected(this);
+          // Make sure the input is checked accordingly.
+          this.input.attr('checked', state);
+
+          // Say that this node is selected.
+          if (params.selected) {
+            params.selected(this);
+          }
         }
       }
     };
@@ -410,8 +552,10 @@
               // Set the checked state based on input.
               node.checked = $(event.target).is(':checked');
 
-              // Expand if checked.
-              node.expand(node.checked);
+              // Expand if deep loading. Collapse if unchecked.
+              if (!node.checked || params.deepLoad) {
+                node.expand(node.checked);
+              }
 
               // Call the select method.
               node.selectChildren(node.checked);
@@ -756,9 +900,17 @@
       var selectAll = root.getSelectAll();
       if (selectAll !== false && !root.showRoot) {
 
+        // See if the select all button should be checked.
+        var checked = false;
+        var default_value = params.default_value;
+        if (default_value.hasOwnProperty(root.value + '-include-below')) {
+          checked = true;
+        }
+
         // Create an input that will select all children if selected.
         root.display.append($(document.createElement('input')).attr({
-          'type': 'checkbox'
+          'type': 'checkbox',
+          'checked': checked
         }).bind('click', (function(node) {
           return function(event) {
             node.selectChildren($(event.target).is(':checked'));
@@ -816,9 +968,18 @@
         if (defaults) {
 
           // Select the children based on the defaults.
-          node.selectChildren(defaults, function() {
-            doneLoading.call(node);
-          });
+          if (params.deepLoad) {
+            node.selectChildren(defaults, function() {
+              doneLoading.call(node);
+            });
+          }
+          else {
+            // When not deep loading, use selectDefaults to search for defaults
+            // using breadth first check.
+            node.selectDefaults(defaults, function() {
+              doneLoading.call(node);
+            });
+          }
         }
         else {
           doneLoading.call(node);
@@ -1098,7 +1259,12 @@
             var selected_choice = $('li#choice_' + node.id, choices);
 
             // Add the choice if not already added.
-            if (node.checked && (selected_choice.length == 0)) {
+            if (node.checked) {
+
+              // If the choice is already selected, remove it.
+              if (selected_choice.length != 0) {
+                selected_choice.remove();
+              }
 
               // Add this to the selected nodes.
               selectedNodes[node.id] = node;
@@ -1134,7 +1300,14 @@
               choice.eq(0)[0].nodeData = node;
 
               var span = $(document.createElement('span'));
-              span.text(node.title);
+
+              // If including children below, add text to the title to say so.
+              if (!params.deepLoad && node.include_children) {
+                span.text(node.title + ' (All below)');
+              }
+              else {
+                span.text(node.title);
+              }
 
               // Don't allow them to remove the root element unless it is
               // visible and has children.
@@ -1148,6 +1321,9 @@
 
                   // Prevent the default.
                   event.preventDefault();
+
+                  // Get the node data.
+                  node = this.parentNode.nodeData;
 
                   // Remove the choice.
                   $('li#choice_' + node.id, choices).remove();
