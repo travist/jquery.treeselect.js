@@ -226,11 +226,11 @@
   display: block;
   position: absolute;
   right: 3px;
-  top: 4px;
-  width: 12px;
-  height: 13px;
+  top: 5px;
+  width: 10px;
+  height: 10px;
   font-size: 1px;
-  background: url(http://harvesthq.github.com/chosen/chosen/chosen-sprite.png) right top no-repeat;
+  background: url(images/chosen-sprite.png) right top no-repeat;
 }
 .chzntree-container-multi .chzntree-choices .search-choice .search-choice-close:hover {
   background-position: right -11px;
