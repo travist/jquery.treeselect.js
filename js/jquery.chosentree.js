@@ -342,8 +342,12 @@
               choices.prepend(choice.append(span).append(close));
             }
 
-            // Show the choices.
-            choices.show();
+            // Only show the choices if they are not visible.
+            if (!choices.is(':visible')) {
+
+              // Show the choices.
+              choices.show();
+            }
 
             // Reset the selected nodes.
             selectedNodes = {};

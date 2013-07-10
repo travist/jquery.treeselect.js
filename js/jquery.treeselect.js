@@ -310,28 +310,38 @@
      * @param {boolean} state The state of the selection or array of defaults.
      * @param {function} done Called when we are done selecting.
      */
-    TreeNode.prototype.selectChildren = function(state, done) {
+    TreeNode.prototype.selectChildren = function(state, done, child) {
 
       // See if the state is a boolean.
       var defaults = (typeof state == 'object');
+
+      // Create a function to call when we are done selecting.
+      var doneSelecting = function() {
+        if (!child) {
+
+          // If they provided a selected parameter.
+          if (params.selected) {
+            params.selected(this, true);
+          }
+
+          // Say that we are done.
+          if (done) {
+
+            done.call(this);
+          }
+        }
+      };
 
       if (params.deepLoad) {
 
         // Load all nodes underneath this node.
         this.loadAll(function() {
 
-          // Say this node is now fully selected.
-          if (params.selected) {
-            params.selected(this, true);
-          }
-
           // Set this node not busy.
           this.setBusy(false, busyselecting);
 
-          // Say we are now done.
-          if (done) {
-            done.call(this);
-          }
+          // We are done selecting.
+          doneSelecting.call(this);
 
         }, function(node) {
 
@@ -367,7 +377,10 @@
           this.expand(state);
           var i = this.children.length;
           while (i--) {
-            this.children[i].selectChildren(state, done);
+
+            // Do not pass in the done callback so that we won't call it
+            // prematurely.
+            this.children[i].selectChildren(state, done, true);
           }
         }
         else {
@@ -381,15 +394,8 @@
           }
         }
 
-        // Say this node is now fully selected.
-        if (params.selected) {
-          params.selected(this);
-        }
-
-        // Say we are now done.
-        if (done) {
-          done.call(this);
-        }
+        // We are done selecting.
+        doneSelecting.call(this);
       }
     };
 
@@ -455,11 +461,9 @@
           }
         }
         else if (queueItem.root && queueItem.include_children) {
+
           // Select the root node's children.
-          var i = queueItem.children.length;
-          while (i--) {
-            queueItem.selectChildren(queueItem.children[i]);
-          }
+          queueItem.selectChildren(true);
         }
       }
 
