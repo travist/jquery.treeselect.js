@@ -183,7 +183,7 @@
               'type': 'button',
               'value': params.search_text
             });
-            search_btn.addClass('chosentree-search-btn');
+            search_btn.addClass('button chosentree-search-btn');
             search_btn.bind('click', function(event) {
               event.preventDefault();
               doSearch(input.val());
