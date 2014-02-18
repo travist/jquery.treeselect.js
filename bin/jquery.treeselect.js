@@ -15,6 +15,7 @@
       onbuild: null,              /** Called when each node is building. */
       postbuild: null,            /** Called when the node is done building. */
       inputName: 'treeselect',    /** The input name. */
+      autoSelectChildren: true,   /** Select chldrn when parent is selected. */
       showRoot: false,            /** Show the root item with a checkbox. */
       selectAll: false,           /** If we wish to see a select all. */
       selectAllText: 'Select All' /** The select all text. */
@@ -499,6 +500,7 @@
 
           // Make sure the input is checked accordingly.
           this.input.attr('checked', state);
+          $('input[name="' + this.input.attr('name') + '"]').change();
 
           // Say that this node is selected.
           if (params.selected) {
@@ -527,8 +529,10 @@
       // Only add an input if the input name is defined.
       if (params.inputName) {
 
-        // If this node is excluded, then add a dummy div tag.
-        if ((typeof this.exclude[this.id] !== 'undefined')) {
+        // If this node is excluded or has no roles enabled in the group finder,
+        // then add a dummy div tag.
+        if ((typeof this.exclude[this.id] !== 'undefined') ||
+          (params.inputName == 'group_finder' && !this.data.roles_enabled)) {
           this.input = $(document.createElement('div'));
           this.input.addClass('treenode-no-select');
         }
@@ -555,13 +559,17 @@
               // Set the checked state based on input.
               node.checked = $(event.target).is(':checked');
 
-              // Expand if deep loading. Collapse if unchecked.
-              if (!node.checked || params.deepLoad) {
-                node.expand(node.checked);
-              }
+              // Only expand/collapse and select children if auto select
+              // children is enabled.
+              if (params.autoSelectChildren) {
+                // Expand if deep loading. Collapse if unchecked.
+                if (!node.checked || params.deepLoad) {
+                  node.expand(node.checked);
+                }
 
-              // Call the select method.
-              node.selectChildren(node.checked);
+                // Call the select method.
+                node.selectChildren(node.checked);
+              }
             };
           })(this));
 
@@ -1130,6 +1138,14 @@
                     root.childlist.removeClass('chzntree-search-results');
                   }
 
+                  // Add class if input checkbox is enabled.
+                  if (params.inputName != '') {
+                    root.childlist.addClass('input-enabled');
+                  }
+                  else {
+                    root.childlist.removeClass('input-enabled');
+                  }
+
                   // Iterate through our nodes.
                   for (var i in nodes) {
                     count++;
@@ -1337,35 +1353,39 @@
               }
 
               // Add this to the choices.
-              choices.prepend(choice.append(span).append(close));
+              if (choices) {
+                choices.prepend(choice.append(span).append(close));
+              }
             }
 
-            // Only show the choices if they are not visible.
-            if (!choices.is(':visible')) {
+            if (choices) {
+              // Only show the choices if they are not visible.
+              if (!choices.is(':visible')) {
 
-              // Show the choices.
-              choices.show();
-            }
+                // Show the choices.
+                choices.show();
+              }
 
-            // Reset the selected nodes.
-            selectedNodes = {};
+              // Reset the selected nodes.
+              selectedNodes = {};
 
-            // Don't show the default value if the root has not children.
-            if (input && node.children.length == 0) {
-              input.attr({'value': ''});
-            }
+              // Don't show the default value if the root has not children.
+              if (input && node.children.length == 0) {
+                input.attr({'value': ''});
+              }
 
-            // Show more or less.
-            if (jQuery.fn.moreorless) {
+              // Show more or less.
+              if (jQuery.fn.moreorless) {
 
-              // Get how many nodes there are.
-              var numNodes = $('li.search-choice', choices).length;
+                // Get how many nodes there are.
+                var numNodes = $('li.search-choice', choices).length;
 
-              // Add this to the choices.
-              var more_text = params.more_text.replace('%num%', numNodes);
-              choices.moreorless(params.min_height, more_text);
-              if (!choices.div_expanded) {
-                showTree(true, null);
+                // Add this to the choices.
+                var more_text = params.more_text.replace('%num%', numNodes);
+                choices.moreorless(params.min_height, more_text);
+                if (!choices.div_expanded) {
+                  showTree(true, null);
+                }
               }
             }
 

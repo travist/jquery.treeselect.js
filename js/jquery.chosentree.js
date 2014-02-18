@@ -132,6 +132,14 @@
                     root.childlist.removeClass('chzntree-search-results');
                   }
 
+                  // Add class if input checkbox is enabled.
+                  if (params.inputName != '') {
+                    root.childlist.addClass('input-enabled');
+                  }
+                  else {
+                    root.childlist.removeClass('input-enabled');
+                  }
+
                   // Iterate through our nodes.
                   for (var i in nodes) {
                     count++;
@@ -339,35 +347,39 @@
               }
 
               // Add this to the choices.
-              choices.prepend(choice.append(span).append(close));
+              if (choices) {
+                choices.prepend(choice.append(span).append(close));
+              }
             }
 
-            // Only show the choices if they are not visible.
-            if (!choices.is(':visible')) {
+            if (choices) {
+              // Only show the choices if they are not visible.
+              if (!choices.is(':visible')) {
 
-              // Show the choices.
-              choices.show();
-            }
+                // Show the choices.
+                choices.show();
+              }
 
-            // Reset the selected nodes.
-            selectedNodes = {};
+              // Reset the selected nodes.
+              selectedNodes = {};
 
-            // Don't show the default value if the root has not children.
-            if (input && node.children.length == 0) {
-              input.attr({'value': ''});
-            }
+              // Don't show the default value if the root has not children.
+              if (input && node.children.length == 0) {
+                input.attr({'value': ''});
+              }
 
-            // Show more or less.
-            if (jQuery.fn.moreorless) {
+              // Show more or less.
+              if (jQuery.fn.moreorless) {
 
-              // Get how many nodes there are.
-              var numNodes = $('li.search-choice', choices).length;
+                // Get how many nodes there are.
+                var numNodes = $('li.search-choice', choices).length;
 
-              // Add this to the choices.
-              var more_text = params.more_text.replace('%num%', numNodes);
-              choices.moreorless(params.min_height, more_text);
-              if (!choices.div_expanded) {
-                showTree(true, null);
+                // Add this to the choices.
+                var more_text = params.more_text.replace('%num%', numNodes);
+                choices.moreorless(params.min_height, more_text);
+                if (!choices.div_expanded) {
+                  showTree(true, null);
+                }
               }
             }
 
