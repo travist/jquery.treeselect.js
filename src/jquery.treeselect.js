@@ -1,5 +1,47 @@
 (function($) {
 
+  // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+  if (!Object.keys) {
+    Object.keys = (function () {
+      'use strict';
+      var hasOwnProperty = Object.prototype.hasOwnProperty,
+        hasDontEnumBug = !({toString: null}).propertyIsEnumerable('toString'),
+        dontEnums = [
+          'toString',
+          'toLocaleString',
+          'valueOf',
+          'hasOwnProperty',
+          'isPrototypeOf',
+          'propertyIsEnumerable',
+          'constructor'
+        ],
+        dontEnumsLength = dontEnums.length;
+
+      return function (obj) {
+        if (typeof obj !== 'object' && (typeof obj !== 'function' || obj === null)) {
+          throw new TypeError('Object.keys called on non-object');
+        }
+
+        var result = [], prop, i;
+
+        for (prop in obj) {
+          if (hasOwnProperty.call(obj, prop)) {
+            result.push(prop);
+          }
+        }
+
+        if (hasDontEnumBug) {
+          for (i = 0; i < dontEnumsLength; i++) {
+            if (hasOwnProperty.call(obj, dontEnums[i])) {
+              result.push(dontEnums[i]);
+            }
+          }
+        }
+        return result;
+      };
+    }());
+  }
+
   // The tree select control.
   $.fn.treeselect = function(params) {
 
@@ -842,37 +884,41 @@
 
           // Call the searcher for the new nodes.
           params.searcher(this, text, function(nodes, getNode) {
-            var treenode = null;
 
             // Get the number of nodes.
-            var numNodes = nodes.length;
+            var numNodes = Object.keys(nodes).length;
 
             // If no nodes were returned then return nothing.
-            if (nodes.length === 0) {
+            if (numNodes === 0) {
               callback(results, true);
             }
 
-            // Build a node.
-            var buildNode = function(id) {
+            // Called when the tree node is built.
+            var onBuilt = function(id) {
 
-              // Decrement the counter.
-              numNodes--;
+              // Return the method to call when the node is built.
+              return function(treenode) {
 
-              // Add the node to the results.
-              results[id] = treenode;
+                // Decrement the counter.
+                numNodes--;
 
-              // If no more nodes are loading, then callback.
-              if (!numNodes) {
+                // Add the node to the results.
+                results[id] = treenode;
 
-                // Callback with the search results.
-                callback(results, true);
-              }
+                // If no more nodes are loading, then callback.
+                if (!numNodes) {
+
+                  // Callback with the search results.
+                  callback(results, true);
+                }
+              };
             };
 
+            // Iterate through all the nodes.
             for (var id in nodes) {
 
               // Set the treenode.
-              treenode = new TreeNode(getNode ? getNode(nodes[id]) : nodes[id]);
+              var treenode = new TreeNode(getNode ? getNode(nodes[id]) : nodes[id]);
 
               // Say this node is loaded.
               treenode.nodeloaded = true;
@@ -881,7 +927,7 @@
               loadedNodes[treenode.id] = treenode.id;
 
               // Build the node.
-              treenode.build(buildNode(id));
+              treenode.build(onBuilt(id));
             }
           });
         }
