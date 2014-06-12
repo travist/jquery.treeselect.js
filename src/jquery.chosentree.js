@@ -390,8 +390,8 @@
             // If they wish to know when it is loaded.
             if (treeparams.loaded) {
 
-              // Call our callback with all the nodes.
-              treeparams.loaded(nodes);
+              // Call our callback with the loaded node.
+              treeparams.loaded(node);
             }
 
             // Trigger an event.
