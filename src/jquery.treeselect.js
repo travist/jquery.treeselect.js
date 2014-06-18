@@ -524,6 +524,23 @@
     };
 
     /**
+     * Sets the checked state for the input field depending on the state.
+     *
+     * @param {boolean} state
+     */
+    TreeNode.prototype.setChecked = function(state) {
+
+      // Set the checked state.
+      this.checked = state;
+
+      // Set the checked state for this input.
+      this.input.eq(0)[0].checked = state;
+
+      // Trigger the change event.
+      this.input.change();
+    };
+
+    /**
      * Selects a node.
      *
      * @param {boolean} state The state of the selection.
@@ -541,11 +558,7 @@
         if (state || !this.root || (this.showRoot && this.has_children)) {
 
           // Set the checked state.
-          this.checked = state;
-
-          // Make sure the input is checked accordingly.
-          this.input.attr('checked', state);
-          $('input[name="' + this.input.attr('name') + '"]').change();
+          this.setChecked(state);
 
           // Say that this node is selected.
           if (params.selected) {
@@ -594,15 +607,17 @@
             'type': 'checkbox',
             'value': value,
             'name': params.inputName + '-' + value,
-            'checked': this.checked
           }).addClass('treenode-input');
+
+          // Check the input.
+          this.setChecked(this.checked);
 
           // Bind to the click on the input.
           this.input.bind('click', (function(node) {
             return function(event) {
 
               // Set the checked state based on input.
-              node.checked = $(event.target).is(':checked');
+              node.checked = event.target.checked;
 
               // Only expand/collapse and select children if auto select
               // children is enabled.
@@ -973,15 +988,21 @@
           checked = true;
         }
 
-        // Create an input that will select all children if selected.
-        root.display.append($(document.createElement('input')).attr({
-          'type': 'checkbox',
-          'checked': checked
-        }).bind('click', (function(node) {
-          return function(event) {
-            node.selectChildren($(event.target).is(':checked'));
-          };
-        })(root)));
+        // Create an input element.
+        var inputElement = $(document.createElement('input')).attr({
+          'type': 'checkbox'
+        });
+
+        // Set the checked state.
+        inputElement.eq(0)[0].checked = checked;
+
+        // Bind to the click event.
+        inputElement.bind('click', function(event) {
+          root.selectChildren(event.target.checked);
+        });
+
+        // Add the input item to the root.
+        root.display.append(inputElement);
 
         // If they provided select all text, add it here.
         if (selectAll) {
