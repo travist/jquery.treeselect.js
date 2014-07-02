@@ -754,6 +754,7 @@
             'type': 'checkbox',
             'value': value,
             'name': params.inputName + '-' + value,
+            'id': 'choice_' + this.id
           }).addClass('treenode-input');
 
           // Check the input.
