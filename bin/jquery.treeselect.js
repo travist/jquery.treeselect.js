@@ -1262,7 +1262,8 @@
       more_text: '+%num% more',         /** The text to show in the more. */
       loaded: null,                     /** Called when all items are loaded. */
       collapsed: true,                  /** If the tree should be collapsed. */
-      showtree: false                   /** To show the tree. */
+      showtree: false,                  /** To show the tree. */
+      selected: null                    /** Callback after a node was selected. */
     }, params);
 
     // Iterate through each instance.
@@ -1497,6 +1498,9 @@
       // Now declare the treeselect.
       var treeparams = params;
 
+      // Declare the callback function for selected nodes
+      var selectedNodeCallback = params.selected;
+      
       // Reset the selected callback.
       treeparams.selected = (function(chosentree) {
 
@@ -1522,6 +1526,11 @@
 
               // Add this to the selected nodes.
               selectedNodes[node.id] = node;
+
+              //Call given callback function
+              if(selectedNodeCallback !== null) {
+                selectedNodeCallback(node,direct);              
+              }
             }
             else if (!node.checked) {
 
