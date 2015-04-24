@@ -49,7 +49,8 @@
       loaded: null,                     /** Called when all items are loaded. */
       collapsed: true,                  /** If the tree should be collapsed. */
       showtree: false,                  /** To show the tree. */
-      selected: null                    /** Callback after a node was selected. */
+      selected: null,                   /** Callback after a node was selected. */
+      selectedAll: null                 /** Callback after all nodes were selected. */
     }, params);
 
     // Iterate through each instance.
@@ -284,14 +285,18 @@
       // Now declare the treeselect.
       var treeparams = params;
 
-      // Declare the callback function for selected nodes
-      var selectedNodeCallback = params.selected;
+      // Declare the callback function for selected node(s)
+      var singleSelectedNodeCallback = params.selected;
+      var selectingCompleteCallback = params.selectedAll;
       
       // Reset the selected callback.
       treeparams.selected = (function(chosentree) {
 
         // Keep track of the selected nodes.
         var selectedNodes = {};
+
+        // Keep track of all selected nodes as an array for the callback function
+        var listOfSelectedNodes = [];        
 
         // The node callback.
         return function(node, direct) {
@@ -312,11 +317,6 @@
 
               // Add this to the selected nodes.
               selectedNodes[node.id] = node;
-
-              //Call given callback function
-              if(selectedNodeCallback !== null) {
-                selectedNodeCallback(node,direct);              
-              }
             }
             else if (!node.checked) {
 
@@ -347,13 +347,18 @@
                 // Deselect this node.
                 node.selectChildren(false);
               };
-            };
+            };            
 
             // Iterate through all the selected nodes.
             for (var id in selectedNodes) {
 
               // Set the node.
               node = selectedNodes[id];
+
+              // Push the node to array for a complete list of all selected nodes for the callback function
+              if(selectingCompleteCallback !== null) {
+                listOfSelectedNodes.push(node);
+              }  
 
               // Add to the chosen tree value.
               chosentree.value[id] = node;
@@ -433,6 +438,20 @@
             // Trigger an event.
             $(chosentree).trigger('treeloaded');
           }
+
+          //Call callback functions
+          if(node.checked) {
+
+            //Call given callback function for a single selected node
+            if(!direct && singleSelectedNodeCallback !== null) {
+              singleSelectedNodeCallback(node);              
+            }
+
+            //Call given callback function for all selected nodes
+            if(direct && selectingCompleteCallback !== null) {
+              selectingCompleteCallback(listOfSelectedNodes);              
+            }
+          }          
         };
       })(this);
 
@@ -457,13 +476,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Global</h3><ul><li><a href="global.html#allLoaded">allLoaded</a></li><li><a href="global.html#autosearch">autosearch</a></li><li><a href="global.html#autoSelectChildren">autoSelectChildren</a></li><li><a href="global.html#busy">busy</a></li><li><a href="global.html#checked">checked</a></li><li><a href="global.html#childlist">childlist</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#collapsed">collapsed</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#deepLoad">deepLoad</a></li><li><a href="global.html#default_value">default_value</a></li><li><a href="global.html#description">description</a></li><li><a href="global.html#display">display</a></li><li><a href="global.html#exclude">exclude</a></li><li><a href="global.html#has_children">has_children</a></li><li><a href="global.html#input">input</a></li><li><a href="global.html#input_placeholder">input_placeholder</a></li><li><a href="global.html#input_type">input_type</a></li><li><a href="global.html#inputName">inputName</a></li><li><a href="global.html#label">label</a></li><li><a href="global.html#level">level</a></li><li><a href="global.html#link">link</a></li><li><a href="global.html#load">load</a></li><li><a href="global.html#loaded">loaded</a></li><li><a href="global.html#min_height">min_height</a></li><li><a href="global.html#more_text">more_text</a></li><li><a href="global.html#no_results_text">no_results_text</a></li><li><a href="global.html#nodeloaded">nodeloaded</a></li><li><a href="global.html#odd">odd</a></li><li><a href="global.html#onbuild">onbuild</a></li><li><a href="global.html#postbuild">postbuild</a></li><li><a href="global.html#search_text">search_text</a></li><li><a href="global.html#searcher">searcher</a></li><li><a href="global.html#selectAll">selectAll</a></li><li><a href="global.html#selectAllText">selectAllText</a></li><li><a href="global.html#selected">selected</a></li><li><a href="global.html#showRoot">showRoot</a></li><li><a href="global.html#showtree">showtree</a></li><li><a href="global.html#span">span</a></li><li><a href="global.html#title">title</a></li><li><a href="global.html#treeloaded">treeloaded</a></li><li><a href="global.html#url">url</a></li><li><a href="global.html#value">value</a></li></ul>
+    <h2><a href="index.html">Index</a></h2><h3>Global</h3><ul><li><a href="global.html#allLoaded">allLoaded</a></li><li><a href="global.html#autosearch">autosearch</a></li><li><a href="global.html#autoSelectChildren">autoSelectChildren</a></li><li><a href="global.html#busy">busy</a></li><li><a href="global.html#checked">checked</a></li><li><a href="global.html#childlist">childlist</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#collapsed">collapsed</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#deepLoad">deepLoad</a></li><li><a href="global.html#default_value">default_value</a></li><li><a href="global.html#description">description</a></li><li><a href="global.html#display">display</a></li><li><a href="global.html#exclude">exclude</a></li><li><a href="global.html#has_children">has_children</a></li><li><a href="global.html#input">input</a></li><li><a href="global.html#input_placeholder">input_placeholder</a></li><li><a href="global.html#input_type">input_type</a></li><li><a href="global.html#inputName">inputName</a></li><li><a href="global.html#label">label</a></li><li><a href="global.html#level">level</a></li><li><a href="global.html#link">link</a></li><li><a href="global.html#load">load</a></li><li><a href="global.html#loaded">loaded</a></li><li><a href="global.html#min_height">min_height</a></li><li><a href="global.html#more_text">more_text</a></li><li><a href="global.html#no_results_text">no_results_text</a></li><li><a href="global.html#nodeloaded">nodeloaded</a></li><li><a href="global.html#odd">odd</a></li><li><a href="global.html#onbuild">onbuild</a></li><li><a href="global.html#postbuild">postbuild</a></li><li><a href="global.html#search_text">search_text</a></li><li><a href="global.html#searcher">searcher</a></li><li><a href="global.html#selectAll">selectAll</a></li><li><a href="global.html#selectAllText">selectAllText</a></li><li><a href="global.html#selected">selected</a></li><li><a href="global.html#selectedAll">selectedAll</a></li><li><a href="global.html#showRoot">showRoot</a></li><li><a href="global.html#showtree">showtree</a></li><li><a href="global.html#span">span</a></li><li><a href="global.html#title">title</a></li><li><a href="global.html#treeloaded">treeloaded</a></li><li><a href="global.html#url">url</a></li><li><a href="global.html#value">value</a></li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Thu Apr 23 2015 19:49:27 GMT-0000 (UTC)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Fri Apr 24 2015 22:12:18 GMT-0000 (UTC)
 </footer>
 
 <script> prettyPrint(); </script>

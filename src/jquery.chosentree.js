@@ -22,7 +22,8 @@
       loaded: null,                     /** Called when all items are loaded. */
       collapsed: true,                  /** If the tree should be collapsed. */
       showtree: false,                  /** To show the tree. */
-      selected: null                    /** Callback after a node was selected. */
+      selected: null,                   /** Callback after a node was selected. */
+      selectedAll: null                 /** Callback after all nodes were selected. */
     }, params);
 
     // Iterate through each instance.
@@ -257,14 +258,18 @@
       // Now declare the treeselect.
       var treeparams = params;
 
-      // Declare the callback function for selected nodes
-      var selectedNodeCallback = params.selected;
+      // Declare the callback function for selected node(s)
+      var singleSelectedNodeCallback = params.selected;
+      var selectingCompleteCallback = params.selectedAll;
       
       // Reset the selected callback.
       treeparams.selected = (function(chosentree) {
 
         // Keep track of the selected nodes.
         var selectedNodes = {};
+
+        // Keep track of all selected nodes as an array for the callback function
+        var listOfSelectedNodes = [];        
 
         // The node callback.
         return function(node, direct) {
@@ -285,11 +290,6 @@
 
               // Add this to the selected nodes.
               selectedNodes[node.id] = node;
-
-              //Call given callback function
-              if(selectedNodeCallback !== null) {
-                selectedNodeCallback(node,direct);              
-              }
             }
             else if (!node.checked) {
 
@@ -320,13 +320,18 @@
                 // Deselect this node.
                 node.selectChildren(false);
               };
-            };
+            };            
 
             // Iterate through all the selected nodes.
             for (var id in selectedNodes) {
 
               // Set the node.
               node = selectedNodes[id];
+
+              // Push the node to array for a complete list of all selected nodes for the callback function
+              if(selectingCompleteCallback !== null) {
+                listOfSelectedNodes.push(node);
+              }  
 
               // Add to the chosen tree value.
               chosentree.value[id] = node;
@@ -406,6 +411,20 @@
             // Trigger an event.
             $(chosentree).trigger('treeloaded');
           }
+
+          //Call callback functions
+          if(node.checked) {
+
+            //Call given callback function for a single selected node
+            if(!direct && singleSelectedNodeCallback !== null) {
+              singleSelectedNodeCallback(node);              
+            }
+
+            //Call given callback function for all selected nodes
+            if(direct && selectingCompleteCallback !== null) {
+              selectingCompleteCallback(listOfSelectedNodes);              
+            }
+          }          
         };
       })(this);
 
