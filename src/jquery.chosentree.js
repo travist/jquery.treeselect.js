@@ -22,8 +22,8 @@
       loaded: null,                     /** Called when all items are loaded. */
       collapsed: true,                  /** If the tree should be collapsed. */
       showtree: false,                  /** To show the tree. */
-      selected: null,                   /** Callback after a node was selected. */
-      selectedAll: null                 /** Callback after all nodes were selected. */
+      selected: null,                   /** Callback when a node was selected, returns the selected node. */
+      selectedAll: null                 /** Callback after all nodes were selected, returns object with all selected nodes. */
     }, params);
 
     // Iterate through each instance.
@@ -268,9 +268,6 @@
         // Keep track of the selected nodes.
         var selectedNodes = {};
 
-        // Keep track of all selected nodes as an array for the callback function
-        var listOfSelectedNodes = [];        
-
         // The node callback.
         return function(node, direct) {
 
@@ -290,6 +287,11 @@
 
               // Add this to the selected nodes.
               selectedNodes[node.id] = node;
+
+              //Call given callback function for a single selected node
+              if(!direct && singleSelectedNodeCallback !== null) {
+                singleSelectedNodeCallback(node);              
+              }              
             }
             else if (!node.checked) {
 
@@ -328,11 +330,6 @@
               // Set the node.
               node = selectedNodes[id];
 
-              // Push the node to array for a complete list of all selected nodes for the callback function
-              if(selectingCompleteCallback !== null) {
-                listOfSelectedNodes.push(node);
-              }  
-
               // Add to the chosen tree value.
               chosentree.value[id] = node;
 
@@ -368,6 +365,12 @@
               if (choices) {
                 choices.prepend(choice.append(span).append(close));
               }
+            }
+
+
+            //Call given callback function for all selected nodes
+            if(node.checked && selectingCompleteCallback !== null) {
+              selectingCompleteCallback(selectedNodes);              
             }
 
             if (choices) {
@@ -410,21 +413,7 @@
 
             // Trigger an event.
             $(chosentree).trigger('treeloaded');
-          }
-
-          //Call callback functions
-          if(node.checked) {
-
-            //Call given callback function for a single selected node
-            if(!direct && singleSelectedNodeCallback !== null) {
-              singleSelectedNodeCallback(node);              
-            }
-
-            //Call given callback function for all selected nodes
-            if(direct && selectingCompleteCallback !== null) {
-              selectingCompleteCallback(listOfSelectedNodes);              
-            }
-          }          
+          }                    
         };
       })(this);
 
