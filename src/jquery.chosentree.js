@@ -21,7 +21,9 @@
       more_text: '+%num% more',         /** The text to show in the more. */
       loaded: null,                     /** Called when all items are loaded. */
       collapsed: true,                  /** If the tree should be collapsed. */
-      showtree: false                   /** To show the tree. */
+      showtree: false,                  /** To show the tree. */
+      selected: null,                   /** Callback when a node was selected, returns the selected node. */
+      selectedAll: null                 /** Callback after all nodes were selected, returns object with all selected nodes. */
     }, params);
 
     // Iterate through each instance.
@@ -256,6 +258,10 @@
       // Now declare the treeselect.
       var treeparams = params;
 
+      // Declare the callback function for selected node(s)
+      var singleSelectedNodeCallback = params.selected;
+      var selectingCompleteCallback = params.selectedAll;
+      
       // Reset the selected callback.
       treeparams.selected = (function(chosentree) {
 
@@ -281,6 +287,11 @@
 
               // Add this to the selected nodes.
               selectedNodes[node.id] = node;
+
+              //Call given callback function for a single selected node
+              if(!direct && singleSelectedNodeCallback !== null) {
+                singleSelectedNodeCallback(node);              
+              }              
             }
             else if (!node.checked) {
 
@@ -311,7 +322,7 @@
                 // Deselect this node.
                 node.selectChildren(false);
               };
-            };
+            };            
 
             // Iterate through all the selected nodes.
             for (var id in selectedNodes) {
@@ -356,6 +367,12 @@
               }
             }
 
+
+            //Call given callback function for all selected nodes
+            if(node.checked && selectingCompleteCallback !== null) {
+              selectingCompleteCallback(selectedNodes);              
+            }
+
             if (choices) {
               // Only show the choices if they are not visible.
               if (!choices.is(':visible')) {
@@ -396,7 +413,7 @@
 
             // Trigger an event.
             $(chosentree).trigger('treeloaded');
-          }
+          }                    
         };
       })(this);
 
